@@ -1,9 +1,11 @@
 # Notes
 
 ## Done
+
 Everything in the brief's priority list, steps 1 to 11, including the bottom-of-list items (dark mode, shortcuts, compare, drawer).
 
 ## Verified
+
 - `npm run build` passes (tsc strict, no `any`).
 - Headless Chromium at 375, 768 and 1280px: no console errors, no horizontal scroll on any route.
 - axe-core (wcag2a, wcag2aa, wcag21aa, best-practice): 0 violations on all pages, in light and dark, at 375 and 1280px, including the drawer, help dialog, compare view and a populated tracker.
@@ -11,6 +13,7 @@ Everything in the brief's priority list, steps 1 to 11, including the bottom-of-
 - Not tested: a real screen reader, Safari/Firefox, or `forced-colors` mode on a real device.
 
 ## Assumptions
+
 1. `match.ts` is untouched. `store.ts` gained one action, `restore`, so Remove can be undone.
 2. Dependencies: framer-motion pinned to ^11.18 and tailwind-merge to ^2.6 (v3 of tailwind-merge targets Tailwind v4).
 3. Profile completeness counts 7 fields (level, field, category, state, gender, income, percentage). "Prefer not to say" for gender counts as not added.
@@ -24,6 +27,7 @@ Everything in the brief's priority list, steps 1 to 11, including the bottom-of-
 11. Theme preference is stored under `grantly-theme`, with an inline script in `index.html` to avoid a flash.
 
 ## Rough edges
+
 - Kanban moves are button-based only; drag and drop was optional and is not built.
 - Compare is selected from Discover; there is no picker on the Compare page itself.
 - Confetti and stamps are checked by scripted tests, not by eye on a phone.
@@ -47,12 +51,12 @@ Everything in the brief's priority list, steps 1 to 11, including the bottom-of-
 
 ### Pass 3 contrast table
 
-| Pair | Light | Dark | Intended use |
-|---|---:|---:|---|
-| Ink on surface | 19.8:1 | 21:1 | Body text, borders, shadows |
-| Muted on surface | 8.9:1 | 13.6:1 | Supporting text |
-| Inverse text on accent | 5.9:1 | 5.9:1 | Primary actions and strong-match badges |
-| Accent text on surface | 5.9:1 | 7.1:1 | Signal labels and focus |
+| Pair                   |  Light |   Dark | Intended use                            |
+| ---------------------- | -----: | -----: | --------------------------------------- |
+| Ink on surface         | 19.8:1 |   21:1 | Body text, borders, shadows             |
+| Muted on surface       |  8.9:1 | 13.6:1 | Supporting text                         |
+| Inverse text on accent |  5.9:1 |  5.9:1 | Primary actions and strong-match badges |
+| Accent text on surface |  5.9:1 |  7.1:1 | Signal labels and focus                 |
 
 ### Pass 3 device checklist
 
