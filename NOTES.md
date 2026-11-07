@@ -78,12 +78,12 @@ Everything in the brief's priority list, steps 1 to 11, including the bottom-of-
 
 ## Pass 5 contrast table
 
-| Pair | Light | Dark |
-| --- | ---: | ---: |
-| ink on surface | 19.80:1 | 19.80:1 |
-| muted on surface | 8.86:1 | 9.98:1 |
-| accent text on surface | 5.18:1 | 6.35:1 |
-| on accent | 6.35:1 | 6.35:1 |
+| Pair                   |   Light |    Dark |
+| ---------------------- | ------: | ------: |
+| ink on surface         | 19.80:1 | 19.80:1 |
+| muted on surface       |  8.86:1 |  9.98:1 |
+| accent text on surface |  5.18:1 |  6.35:1 |
+| on accent              |  6.35:1 |  6.35:1 |
 
 ## Pass 6 final verification
 

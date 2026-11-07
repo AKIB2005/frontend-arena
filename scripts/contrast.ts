@@ -48,12 +48,14 @@ if (rows.some((row) => row.light < 4.5 || row.dark < 4.5)) {
 const table = [
   '## Pass 5 contrast table',
   '',
-  '| Pair | Light | Dark |',
-  '| --- | ---: | ---: |',
-  ...rows.map(
-    (row) =>
-      `| ${row.name} | ${row.light.toFixed(2)}:1 | ${row.dark.toFixed(2)}:1 |`,
-  ),
+  '| Pair                   |   Light |    Dark |',
+  '| ---------------------- | ------: | ------: |',
+  ...rows.map((row) => {
+    const name = row.name.padEnd(22)
+    const light = `${row.light.toFixed(2)}:1`.padStart(7)
+    const dark = `${row.dark.toFixed(2)}:1`.padStart(7)
+    return `| ${name} | ${light} | ${dark} |`
+  }),
   '',
 ].join('\n')
 const notes = readFileSync('NOTES.md', 'utf8')
