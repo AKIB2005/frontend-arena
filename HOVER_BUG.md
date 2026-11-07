@@ -1,4 +1,70 @@
-# Pass 8 hover bug investigation
+# Pass 9 hover bug investigation
+
+## Copilot root cause
+
+The requested searches were run against `src`:
+
+```text
+grep -rn "group-hover:\|hover:bg-\|bg-ink\|bg-fill-ink\|whileHover\|variants" src
+grep -rn "\bgroup\b" src
+grep -rn "<article" src
+```
+
+Evidence from the current source:
+
+- `src/components/ScholarshipCard.tsx:30-39` is the Discover scholarship
+  card root. It is now `group/card relative isolate ... bg-surface text-fg`;
+  it has no hover background or text-colour variant and only translates up
+  `0.125rem`.
+- `src/components/ScholarshipCard.tsx:41` is the only absolutely positioned
+  card-face layer. It is `pointer-events-none ... -z-10 ... bg-edge` and only
+  changes its shadow offset with `group-hover/card`, so it cannot cover text.
+- `src/components/ScholarshipCard.tsx:44`, `:56`, `:61`, `:67`, and `:81`
+  keep the ring wrapper, title, provider, amount, and criteria summary in
+  explicit foreground classes. `src/components/RatchetRing.tsx:45` gives the
+  SVG match number an explicit `fill-fg`.
+- `src/pages/Discover.tsx:270-290` wraps each card in a `motion.li`, but the
+  wrapper has no `group`, `whileHover`, colour, opacity, or positioned fill
+  variant. The group is on each card, not on the grid/list.
+- `src/pages/Dashboard.tsx:162-176` renders Recommended entries as individual
+  `relative isolate bg-surface text-fg` list-item faces. There is no group or
+  hover fill.
+- `src/pages/Compare.tsx:45` renders each comparison card through the shared
+  `Card`, whose root contract is `relative isolate ... bg-surface text-fg` at
+  `src/components/ui/Card.tsx:14-18`.
+- `src/pages/Tracker.tsx:29-111` uses an individual
+  `group/tracker relative ... bg-surface text-fg` item. Its only absolute
+  child is the four-dot decoration at `:37`, with no fill wipe and no text
+  colour change.
+- `src/pages/Home.tsx:227-271` renders each hero ranking item as an individual
+  `relative isolate ... bg-surface text-fg` motion item. Its only absolute
+  child is the numeric delta at `:258-266`; no parent hover variant exists.
+- `src/components/QuickView.tsx:16-92` renders inside the Dialog surface at
+  `src/components/Dialog.tsx:50-58`, which is explicitly
+  `bg-surface text-fg`; it has no card hover group or overlay.
+- `src/pages/Detail.tsx:52` is the only literal `<article>` outside the
+  scholarship card and is a page-level wrapper, not a scholarship card.
+
+The broad search also found intentional non-card fills: `bg-fill-ink
+text-on-ink` in `Dashboard.tsx:66`, `Home.tsx:235`, `CompareBar.tsx:45`,
+`Stepper.tsx:63`, `Button.tsx:16`, `Tooltip.tsx:17`, and the `CheckRow`
+status indicator at `CheckRow.tsx:7`; these are paired foreground/background
+tokens and are not hover card faces. The remaining `bg-ink` matches are the
+Tracker dots (`Tracker.tsx:39-42`), the dialog scrim (`Dialog.tsx:44`), and
+the scholarship criteria indicator (`ScholarshipCard.tsx:95`), none of which
+contains card text.
+
+No `whileHover` match exists in `src`. The only `variants` matches are
+entrance/overlay animations in `CheckRow.tsx`, `Dialog.tsx`, and
+`Onboarding.tsx`; none is attached to a scholarship-card parent.
+
+The previous implementation had two unsafe contracts: the scholarship card
+overrode the shared face with `text-ink` and used an ink decorative layer,
+while the shared `Card` contract also defaulted to `text-ink`. The fix makes
+all card faces explicitly `bg-surface text-fg`, uses `text-muted` for provider
+metadata, uses `fill-fg` for the ring number, and uses `bg-edge` only for the
+isolated negative-z decorative shadow. This removes any possibility of a
+hovered fill and foreground sharing the same theme token.
 
 ## Pass 8 root cause
 

@@ -32,20 +32,20 @@ export function ScholarshipCard({ s, score, checks, onQuickView }: Props) {
       tabIndex={0}
       data-testid="scholarship-card"
       className={cn(
-        'group/card relative isolate flex h-full flex-col gap-4 bg-surface text-ink transition-[transform,opacity] duration-200 can-hover:hover:-translate-x-0.5 can-hover:hover:-translate-y-0.5 focus-within:-translate-x-0.5 focus-within:-translate-y-0.5',
+        'group/card relative isolate flex h-full flex-col gap-4 bg-surface text-fg transition-[transform,opacity] duration-200 can-hover:hover:-translate-y-0.5 focus-within:-translate-y-0.5',
         isUrgent(s.deadline) && 'ticket',
       )}
     >
       <span
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 -z-10 translate-x-1 translate-y-1 rounded-xl bg-ink transition-transform duration-200 group-hover/card:translate-x-2 group-hover/card:translate-y-2"
+        className="pointer-events-none absolute inset-0 -z-10 translate-x-1 translate-y-1 rounded-xl bg-edge transition-transform duration-200 group-hover/card:translate-x-2 group-hover/card:translate-y-2"
       />
       <Stamp id={s.id} />
       <div className="relative z-10 flex min-h-[12rem] gap-4">
         <Tooltip
           label={`Why this match? ${checks.filter((c) => c.status === 'met').length} met, ${checks.filter((c) => c.status === 'unmet').length} not met, ${checks.filter((c) => c.status === 'unknown').length} to check.`}
         >
-          <span className="inline-flex text-ink">
+          <span className="inline-flex text-fg">
             <RatchetRing value={score} />
           </span>
         </Tooltip>
@@ -53,7 +53,7 @@ export function ScholarshipCard({ s, score, checks, onQuickView }: Props) {
           <h3
             data-testid="scholarship-title"
             title={s.name}
-            className="line-clamp-2 text-lg font-extrabold leading-snug text-ink"
+            className="line-clamp-2 text-lg font-extrabold leading-snug text-fg"
           >
             <Link
               to={`/s/${s.id}`}
@@ -62,13 +62,13 @@ export function ScholarshipCard({ s, score, checks, onQuickView }: Props) {
               {s.name}
             </Link>
           </h3>
-          <p data-testid="scholarship-provider" className="text-sm text-ink/70">
+          <p data-testid="scholarship-provider" className="text-sm text-muted">
             {s.provider}
           </p>
           <p className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1">
             <span
               data-testid="scholarship-amount"
-              className="font-head text-xl font-extrabold text-ink"
+              className="font-head text-xl font-extrabold text-fg"
             >
               {money(s.amount)}
             </span>
@@ -78,7 +78,7 @@ export function ScholarshipCard({ s, score, checks, onQuickView }: Props) {
           </p>
         </div>
       </div>
-      <div className="relative z-10 grid min-h-[4.25rem] content-center gap-2 rounded-lg border-2 border-edge bg-surface p-2 text-sm text-ink transition-[transform,opacity] duration-200 sm:opacity-0 sm:translate-y-2 sm:group-hover/card:translate-y-0 sm:group-hover/card:opacity-100 sm:group-focus-within/card:translate-y-0 sm:group-focus-within/card:opacity-100">
+      <div className="relative z-10 grid min-h-[4.25rem] content-center gap-2 rounded-lg border-2 border-edge bg-surface p-2 text-sm text-fg transition-[transform,opacity] duration-200 sm:opacity-0 sm:translate-y-2 sm:group-hover/card:translate-y-0 sm:group-hover/card:opacity-100 sm:group-focus-within/card:translate-y-0 sm:group-focus-within/card:opacity-100">
         <p className="font-bold">
           You meet {checks.filter((c) => c.status === 'met').length} of{' '}
           {checks.length} criteria

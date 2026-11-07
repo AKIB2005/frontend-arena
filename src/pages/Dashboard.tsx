@@ -161,7 +161,7 @@ export default function Dashboard() {
             {recommended.map(({ s, m }) => (
               <li
                 key={s.id}
-                className="flex items-center justify-between gap-3 rounded-xl border-2 border-edge bg-paper p-3"
+                className="relative isolate flex items-center justify-between gap-3 rounded-xl border-2 border-edge bg-surface p-3 text-fg"
               >
                 <div className="min-w-0">
                   <Link
