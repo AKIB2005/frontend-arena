@@ -76,6 +76,70 @@ async function assertDiscoverHoverContrast(page: Page) {
   }
 }
 
+async function assertDiscoverCardsSurviveScroll(page: Page) {
+  const filter = page.getByRole('region', { name: 'Search and filters' })
+  const cards = page.locator('[data-testid="scholarship-card"]')
+  const maxScroll = await page.evaluate(
+    () => document.documentElement.scrollHeight - window.innerHeight,
+  )
+  const positions = [
+    ...Array.from(
+      { length: Math.floor(maxScroll / 320) + 1 },
+      (_, index) => index * 320,
+    ),
+    maxScroll,
+  ]
+
+  for (const position of [...new Set(positions)]) {
+    await page.evaluate((scrollTop) => window.scrollTo(0, scrollTop), position)
+    await page.waitForTimeout(50)
+    await filter.waitFor()
+    const filterBox = await filter.boundingBox()
+    expect(filterBox).not.toBeNull()
+    const states = await cards.evaluateAll((elements) => {
+      const viewportHeight = window.innerHeight
+      return elements.map((element) => {
+        const title = element.querySelector<HTMLElement>(
+          '[data-testid="scholarship-title"]',
+        )
+        const cardBox = element.getBoundingClientRect()
+        const titleBox = title?.getBoundingClientRect()
+        const titleStyle = title ? getComputedStyle(title) : null
+        return {
+          opacity: getComputedStyle(element).opacity,
+          cardBox: { top: cardBox.top, bottom: cardBox.bottom },
+          titleBox: titleBox
+            ? {
+                top: titleBox.top,
+                bottom: titleBox.bottom,
+                height: titleBox.height,
+              }
+            : null,
+          titleVisible:
+            titleStyle?.display !== 'none' &&
+            titleStyle?.visibility !== 'hidden' &&
+            titleStyle?.opacity !== '0',
+          inViewport: cardBox.bottom > 0 && cardBox.top < viewportHeight,
+        }
+      })
+    })
+    for (const state of states) {
+      expect(state.opacity).toBe('1')
+      expect(state.titleVisible).toBe(true)
+      expect(state.titleBox?.height).toBeGreaterThan(0)
+      if (
+        state.inViewport &&
+        state.titleBox &&
+        filterBox &&
+        state.titleBox.top < filterBox.bottom &&
+        state.titleBox.bottom > filterBox.top
+      ) {
+        expect(state.titleBox.top).toBeGreaterThanOrEqual(filterBox.bottom)
+      }
+    }
+  }
+}
+
 for (const theme of ['light', 'dark']) {
   test.describe(`${theme} hover visibility`, () => {
     test.beforeEach(async ({ page }) => {
@@ -94,6 +158,23 @@ for (const theme of ['light', 'dark']) {
           path: `docs/qa/hover/${theme}-${route.slice(1) || 'home'}.png`,
           fullPage: true,
         })
+      })
+    }
+
+    for (const reducedMotion of [false, true]) {
+      test(`keeps every card visible while scrolling with reduced motion ${reducedMotion ? 'on' : 'off'}`, async ({
+        page,
+      }) => {
+        await page.goto('/discover')
+        if (theme === 'dark')
+          await page.getByRole('button', { name: 'Dark mode' }).click()
+        if (reducedMotion)
+          await page
+            .getByRole('banner')
+            .getByRole('button', { name: 'Reduce motion' })
+            .click()
+        await page.locator('[data-testid="scholarship-card"]').first().waitFor()
+        await assertDiscoverCardsSurviveScroll(page)
       })
     }
   })

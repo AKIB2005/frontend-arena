@@ -1,5 +1,39 @@
 # Pass 9 hover bug investigation
 
+## Scroll-hide root cause
+
+The requested search was run with:
+
+```text
+grep -rn "whileInView\|useInView\|IntersectionObserver\|content-visibility\|viewport=\|initial={{" src
+```
+
+No `whileInView`, `useInView`, `IntersectionObserver`, `content-visibility`,
+or windowing/virtualisation exists in the Discover card path. The scroll-hide
+cause was the framer-motion entrance in `src/pages/Discover.tsx:272-278`:
+
+```tsx
+initial={entering ? { opacity: 0, y: 12 } : false}
+animate={{ opacity: 1, y: 0 }}
+```
+
+The page timer at `src/pages/Discover.tsx:75-85` set `entering` only during the
+first 800ms after loading. Filtering, sorting, or search changes could remount
+list items while that transition state was active, leaving cards dependent on
+an animation completing before they became visible. The same wrapper was a
+`motion.li` around each `ScholarshipCard`, not the card itself.
+
+The sticky filter at `src/pages/Discover.tsx:145-148` is `sticky top-2 z-20`
+with an opaque `bg-surface` inherited from `Card`. It was not a windowing
+mechanism, but it can cover a card while scrolling beneath it. The results
+section now has `scroll-mt-[22rem]` and `pt-2`, and the test checks that any
+card intersecting the sticky region has its title below the filter.
+
+The fix removes the scroll-dependent `motion.li` entrance and renders plain
+list items. Cards are therefore rendered at `opacity: 1` immediately and
+remain visible through scroll, filter, sort, search, light/dark theme, and
+reduced-motion changes.
+
 ## Copilot root cause
 
 The requested searches were run against `src`:

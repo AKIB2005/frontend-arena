@@ -7,12 +7,10 @@ import {
   useTransition,
   type ReactNode,
 } from 'react'
-import { AnimatePresence, motion } from 'framer-motion'
 import { DATA, type Sch } from '../data'
 import { daysLeft } from '../match'
 import { useApp } from '../store'
 import { CT, FD, LV } from '../lib/options'
-import { useMotion } from '../lib/motion'
 import { CompareBar } from '../components/CompareBar'
 import { QuickView } from '../components/QuickView'
 import { ScholarshipCard } from '../components/ScholarshipCard'
@@ -22,7 +20,7 @@ import { Card } from '../components/ui/Card'
 import { controlClass } from '../components/ui/Field'
 import { useMatches } from '../lib/matches'
 
-// First-visit-only effects: skeletons and the staggered entrance run once per page load.
+// First-visit-only loading keeps the initial page from flashing incomplete data.
 let introDone = false
 
 function Pick({
@@ -58,7 +56,6 @@ function Pick({
 export default function Discover() {
   const profile = useApp((s) => s.profile)
   const matches = useMatches()
-  const { reduce } = useMotion()
   const [q, setQ] = useState('')
   const [lvl, setLvl] = useState('')
   const [fld, setFld] = useState('')
@@ -68,7 +65,6 @@ export default function Discover() {
   const [sort, setSort] = useState('match')
   const [isPending, startTransition] = useTransition()
   const [loading, setLoading] = useState(!introDone)
-  const [entering, setEntering] = useState(false)
   const [quick, setQuick] = useState<Sch | null>(null)
   const trigger = useRef<HTMLElement | null>(null)
   const deferredQuery = useDeferredValue(q)
@@ -78,13 +74,9 @@ export default function Discover() {
     const t = window.setTimeout(() => {
       introDone = true
       setLoading(false)
-      if (!reduce) {
-        setEntering(true)
-        window.setTimeout(() => setEntering(false), 800)
-      }
     }, 400)
     return () => window.clearTimeout(t)
-  }, [reduce])
+  }, [])
 
   const rows = useMemo(() => {
     const w = Number(win)
@@ -248,7 +240,7 @@ export default function Discover() {
 
       <section
         aria-labelledby="results"
-        className="mt-8 pb-28"
+        className="mt-8 scroll-mt-[22rem] pb-28 pt-2"
         aria-busy={isPending}
       >
         <h2 id="results" className="mb-4 text-2xl font-extrabold">
@@ -264,20 +256,9 @@ export default function Discover() {
             ))}
           </div>
         ) : rows.length ? (
-          <AnimatePresence mode="popLayout">
-            <ul className="grid gap-5 md:grid-cols-2">
-              {rows.map(({ s, m }, i) => (
-                <motion.li
-                  key={s.id}
-                  initial={entering ? { opacity: 0, y: 12 } : false}
-                  animate={{ opacity: 1, y: 0 }}
-                  layout
-                  transition={{
-                    duration: 0.2,
-                    ease: 'easeOut',
-                    delay: entering ? Math.min(i, 8) * 0.05 : 0,
-                  }}
-                >
+          <ul className="grid gap-5 md:grid-cols-2">
+            {rows.map(({ s, m }) => (
+              <li key={s.id}>
                   <ScholarshipCard
                     s={s}
                     score={m.score}
@@ -287,10 +268,9 @@ export default function Discover() {
                       setQuick(sch)
                     }}
                   />
-                </motion.li>
-              ))}
-            </ul>
-          </AnimatePresence>
+              </li>
+            ))}
+          </ul>
         ) : (
           <Card className="text-center">
             <p className="text-lg font-extrabold">
