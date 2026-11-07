@@ -32,7 +32,7 @@ export function ScholarshipCard({ s, score, checks, onQuickView }: Props) {
       tabIndex={0}
       data-testid="scholarship-card"
       className={cn(
-        'group/card relative flex h-full flex-col gap-4 transition-[transform,opacity] duration-200 can-hover:hover:-translate-x-0.5 can-hover:hover:-translate-y-0.5 focus-within:-translate-x-0.5 focus-within:-translate-y-0.5',
+        'group/card relative flex h-full flex-col gap-4 bg-paper transition-[transform,opacity] duration-200 can-hover:hover:-translate-x-0.5 can-hover:hover:-translate-y-0.5 focus-within:-translate-x-0.5 focus-within:-translate-y-0.5',
         isUrgent(s.deadline) && 'ticket',
       )}
     >
@@ -78,7 +78,7 @@ export function ScholarshipCard({ s, score, checks, onQuickView }: Props) {
           </p>
         </div>
       </div>
-      <div className="relative z-10 grid min-h-[4.25rem] content-center gap-2 rounded-lg border-2 border-edge bg-paper p-2 text-sm text-ink transition-[transform,opacity] duration-200 sm:opacity-0 sm:translate-y-2 sm:group-hover/card:translate-y-0 sm:group-hover/card:opacity-100 sm:group-focus-within/card:translate-y-0 sm:group-focus-within/card:opacity-100">
+      <div className="relative z-10 grid min-h-[4.25rem] content-center gap-2 rounded-lg border-2 border-edge bg-surface p-2 text-sm text-fg transition-[transform,opacity] duration-200 sm:opacity-0 sm:translate-y-2 sm:group-hover/card:translate-y-0 sm:group-hover/card:opacity-100 sm:group-focus-within/card:translate-y-0 sm:group-focus-within/card:opacity-100">
         <p className="font-bold">
           You meet {checks.filter((c) => c.status === 'met').length} of{' '}
           {checks.length} criteria
