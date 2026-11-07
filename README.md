@@ -239,12 +239,11 @@ No environment variables are required.
 | `preview`      | Serve the production build locally                  |
 | `lint`         | Run ESLint                                          |
 | `test`         | Run Vitest                                          |
+| `e2e`          | Run the Playwright hover regression suite           |
 | `check`        | Run type-checking, lint, tests, contrast, and build |
 | `contrast`     | Check token contrast and update the Notes table     |
 | `analyze`      | Build with `dist/stats.html` bundle analysis        |
 | `format:check` | Check the configured files with Prettier            |
-
-An `e2e` script is not configured in this repository.
 
 ## Testing
 
@@ -259,7 +258,7 @@ npm run contrast
 npm run check
 ```
 
-Playwright flows, axe scans, viewport checks, and screenshot capture are not configured in this repository.
+The Playwright hover suite passed 8 tests across light and dark themes with `npm run e2e`. Axe scans, viewport checks, and Lighthouse were not run.
 
 ## Deployment
 

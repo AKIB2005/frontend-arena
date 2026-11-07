@@ -13,7 +13,7 @@ const base =
 
 const variants: Record<Variant, string> = {
   primary: 'bg-accent text-on-accent',
-  ink: 'bg-ink text-inverse-text',
+  ink: 'bg-fill-ink text-on-ink',
   ghost: 'bg-surface text-fg',
   danger: 'bg-accent text-on-accent',
 }

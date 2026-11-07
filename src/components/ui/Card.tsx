@@ -10,7 +10,7 @@ export function Card({ as: Tag = 'div', flat, className, ...rest }: Props) {
   return (
     <Tag
       className={cn(
-        'relative rounded-xl border-2 border-edge bg-surface p-5 text-fg',
+        'relative isolate rounded-xl border-2 border-edge bg-surface p-5 text-fg',
         !flat && 'shadow-hard',
         className,
       )}

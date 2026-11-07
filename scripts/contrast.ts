@@ -7,6 +7,8 @@ const pairs: Pair[] = [
   ['muted on surface', '#4A4A4A', '#FFFFFF', '#B8B8B8', '#0A0A0A'],
   ['accent text on surface', '#C2410C', '#FFFFFF', '#FF5A1F', '#0A0A0A'],
   ['on accent', '#0A0A0A', '#FF5A1F', '#0A0A0A', '#FF5A1F'],
+  ['on ink', '#FFFFFF', '#0A0A0A', '#0A0A0A', '#FFFFFF'],
+  ['ink on paper', '#0A0A0A', '#F0F0F0', '#FFFFFF', '#171717'],
 ]
 
 function luminance(hex: string) {

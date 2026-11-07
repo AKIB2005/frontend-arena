@@ -84,6 +84,8 @@ Everything in the brief's priority list, steps 1 to 11, including the bottom-of-
 | muted on surface       |  8.86:1 |  9.98:1 |
 | accent text on surface |  5.18:1 |  6.35:1 |
 | on accent              |  6.35:1 |  6.35:1 |
+| on ink                 | 19.80:1 | 19.80:1 |
+| ink on paper           | 17.37:1 | 17.93:1 |
 
 ## Pass 6 final verification
 
@@ -121,3 +123,15 @@ Everything in the brief's priority list, steps 1 to 11, including the bottom-of-
 - [ ] 320px and 200% zoom
 - [ ] Light and dark themes
 - [ ] Screen reader walkthrough
+
+## Fixed in pass 7
+
+- Added `HOVER_BUG.md` with the reproduction and root-cause investigation.
+- Isolated shared Card stacking contexts so shadow layers cannot escape and cover card content.
+- Put scholarship card face, reveal strip, actions, and comparison control on explicit foreground layers.
+- Moved the criteria reveal into a reserved footer area so it cannot cover the title, provider, amount, or deadline.
+- Added stable scholarship field test IDs and native full-name title attributes.
+- Added paired `fill-*`/`on-*` semantic tokens and expanded contrast coverage for ink and paper fills.
+- Kept hover movement within the existing 2px utility lift; no tilt was added.
+
+The Playwright hover regression suite passed 8 tests in light and dark themes, including keyboard focus checks and hover screenshots. The local computed-style reproduction and project check suite pass; see [HOVER_BUG.md](./HOVER_BUG.md).

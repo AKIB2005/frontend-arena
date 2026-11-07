@@ -17,7 +17,7 @@
 
 ## Accessibility failures
 
-- [ ] **P1** No automated route/axe suite is configured in this environment.
+- [x] **P1** Automated hover visibility coverage now runs across Discover, Dashboard, Tracker, and Compare in light and dark themes.
 - [x] **P2** Corrupted persisted state announces a single recovery toast.
 - [x] **P2** Profile includes a confirm-gated reset-data action.
 - Existing controls use visible focus styles and native keyboard semantics; the current dialog and command palette should be verified with a browser test.

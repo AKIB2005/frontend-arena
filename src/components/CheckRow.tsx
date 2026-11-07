@@ -4,7 +4,7 @@ import { cn } from '../lib/utils'
 import { punchIn, useMotion } from '../lib/motion'
 
 const META = {
-  met: { glyph: '✓', cls: 'bg-ink text-inverse-text', text: 'Met' },
+  met: { glyph: '✓', cls: 'bg-fill-ink text-on-ink', text: 'Met' },
   unmet: { glyph: '✕', cls: 'bg-surface text-ink', text: 'Not met' },
   unknown: {
     glyph: '?',

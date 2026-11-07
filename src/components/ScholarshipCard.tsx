@@ -30,6 +30,7 @@ export function ScholarshipCard({ s, score, checks, onQuickView }: Props) {
     <Card
       as="article"
       tabIndex={0}
+      data-testid="scholarship-card"
       className={cn(
         'group/card relative flex h-full flex-col gap-4 transition-[transform,opacity] duration-200 can-hover:hover:-translate-x-0.5 can-hover:hover:-translate-y-0.5 focus-within:-translate-x-0.5 focus-within:-translate-y-0.5',
         isUrgent(s.deadline) && 'ticket',
@@ -40,7 +41,7 @@ export function ScholarshipCard({ s, score, checks, onQuickView }: Props) {
         className="pointer-events-none absolute inset-0 -z-10 translate-x-1 translate-y-1 rounded-xl bg-ink transition-transform duration-200 group-hover/card:translate-x-2 group-hover/card:translate-y-2"
       />
       <Stamp id={s.id} />
-      <div className="flex gap-4">
+      <div className="relative z-10 flex min-h-[12rem] gap-4">
         <Tooltip
           label={`Why this match? ${checks.filter((c) => c.status === 'met').length} met, ${checks.filter((c) => c.status === 'unmet').length} not met, ${checks.filter((c) => c.status === 'unknown').length} to check.`}
         >
@@ -49,7 +50,11 @@ export function ScholarshipCard({ s, score, checks, onQuickView }: Props) {
           </span>
         </Tooltip>
         <div className="min-w-0 flex-1">
-          <h3 className="line-clamp-2 text-lg font-extrabold leading-snug">
+          <h3
+            data-testid="scholarship-title"
+            title={s.name}
+            className="line-clamp-2 text-lg font-extrabold leading-snug"
+          >
             <Link
               to={`/s/${s.id}`}
               className="underline-offset-2 can-hover:hover:underline focus-visible:underline"
@@ -57,37 +62,44 @@ export function ScholarshipCard({ s, score, checks, onQuickView }: Props) {
               {s.name}
             </Link>
           </h3>
-          <p className="text-sm text-muted">{s.provider}</p>
+          <p data-testid="scholarship-provider" className="text-sm text-muted">
+            {s.provider}
+          </p>
           <p className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1">
-            <span className="font-head text-xl font-extrabold">
+            <span
+              data-testid="scholarship-amount"
+              className="font-head text-xl font-extrabold"
+            >
               {money(s.amount)}
             </span>
-            <Due d={s.deadline} />
+            <span data-testid="scholarship-deadline">
+              <Due d={s.deadline} />
+            </span>
           </p>
-        </div>
-        <div className="grid gap-2 rounded-lg border-2 border-edge bg-paper p-2 text-sm sm:opacity-0 sm:translate-y-2 sm:transition-[transform,opacity] sm:duration-200 sm:group-hover/card:translate-y-0 sm:group-hover/card:opacity-100 sm:group-focus-within/card:translate-y-0 sm:group-focus-within/card:opacity-100">
-          <p className="font-bold">
-            You meet {checks.filter((c) => c.status === 'met').length} of{' '}
-            {checks.length} criteria
-          </p>
-          <div
-            className="flex gap-1"
-            aria-label={`${checks.filter((c) => c.status === 'met').length} met, ${checks.filter((c) => c.status === 'unmet').length} not met, ${checks.filter((c) => c.status === 'unknown').length} unknown`}
-          >
-            {checks.map((check) => (
-              <span
-                key={check.label}
-                className={cn(
-                  'h-3 w-3 rounded-full border-2 border-edge',
-                  check.status === 'met' && 'bg-ink',
-                  check.status === 'unknown' && 'border-dashed',
-                )}
-              />
-            ))}
-          </div>
         </div>
       </div>
-      <div className="mt-auto flex flex-wrap gap-2">
+      <div className="relative z-10 grid min-h-[4.25rem] content-center gap-2 rounded-lg border-2 border-edge bg-paper p-2 text-sm text-ink transition-[transform,opacity] duration-200 sm:opacity-0 sm:translate-y-2 sm:group-hover/card:translate-y-0 sm:group-hover/card:opacity-100 sm:group-focus-within/card:translate-y-0 sm:group-focus-within/card:opacity-100">
+        <p className="font-bold">
+          You meet {checks.filter((c) => c.status === 'met').length} of{' '}
+          {checks.length} criteria
+        </p>
+        <div
+          className="flex gap-1"
+          aria-label={`${checks.filter((c) => c.status === 'met').length} met, ${checks.filter((c) => c.status === 'unmet').length} not met, ${checks.filter((c) => c.status === 'unknown').length} unknown`}
+        >
+          {checks.map((check) => (
+            <span
+              key={check.label}
+              className={cn(
+                'h-3 w-3 rounded-full border-2 border-edge',
+                check.status === 'met' && 'bg-ink',
+                check.status === 'unknown' && 'border-dashed',
+              )}
+            />
+          ))}
+        </div>
+      </div>
+      <div className="relative z-10 mt-auto flex flex-wrap gap-2">
         <ButtonLink to={`/s/${s.id}`} variant="ghost" size="sm">
           Check eligibility<span className="sr-only">: {s.name}</span>
         </ButtonLink>
@@ -109,8 +121,9 @@ export function ScholarshipCard({ s, score, checks, onQuickView }: Props) {
         </Button>
       </div>
       <label
+        data-testid="scholarship-compare"
         className={cn(
-          'flex min-h-[44px] items-center gap-3 text-sm font-bold',
+          'relative z-10 flex min-h-[44px] items-center gap-3 text-sm font-bold',
           full && 'opacity-60',
         )}
       >

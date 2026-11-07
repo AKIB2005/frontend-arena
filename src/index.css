@@ -15,6 +15,9 @@
   --accent: #ff5a1f;
   --accent-text: #c2410c;
   --on-accent: #0a0a0a;
+  --fill-ink: #0a0a0a;
+  --on-ink: #ffffff;
+  --fill-paper: #f0f0f0;
   --fg: #0a0a0a;
   --edge: #0a0a0a;
   --shadow: #0a0a0a;
@@ -30,6 +33,9 @@
   --accent: #ff5a1f;
   --accent-text: #ff5a1f;
   --on-accent: #0a0a0a;
+  --fill-ink: #ffffff;
+  --on-ink: #0a0a0a;
+  --fill-paper: #171717;
   --fg: #ffffff;
   --edge: #ffffff;
   --shadow: #ffffff;
