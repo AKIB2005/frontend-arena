@@ -101,6 +101,7 @@ export default function Discover() {
             s.fields.includes('Any') ||
             s.fields.includes(fld)) &&
           (!cat || !s.cats.length || s.cats.includes(cat)) &&
+          daysLeft(s.deadline) >= 0 &&
           (!w || daysLeft(s.deadline) <= w) &&
           (!only || m.score >= 70),
       )

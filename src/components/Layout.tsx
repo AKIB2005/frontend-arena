@@ -91,6 +91,7 @@ export function Layout({ children }: { children: ReactNode }) {
     reduceMotion,
     toggleReduceMotion,
     setCommandOpen,
+    toast,
   } = useUI()
   const { reduce } = useMotion()
   const main = useRef<HTMLElement>(null)
@@ -98,6 +99,17 @@ export function Layout({ children }: { children: ReactNode }) {
   const [wipe, setWipe] = useState(0)
   const [scrolled, setScrolled] = useState(false)
   useShortcuts()
+
+  useEffect(() => {
+    try {
+      if (localStorage.getItem('grantly-storage-reset') === '1') {
+        localStorage.removeItem('grantly-storage-reset')
+        toast('We reset your saved data because it was unreadable.')
+      }
+    } catch {
+      // Storage may be blocked; the app can still use in-memory state.
+    }
+  }, [toast])
 
   useEffect(() => {
     document.documentElement.classList.toggle('dark', theme === 'dark')

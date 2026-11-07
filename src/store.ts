@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { persist } from 'zustand/middleware'
+import { createJSONStorage, persist } from 'zustand/middleware'
 import { emptyProfile, type Profile } from './match'
 export type Status = 'saved' | 'applying' | 'submitted' | 'result'
 export const STATUSES: Status[] = ['saved', 'applying', 'submitted', 'result']
@@ -14,6 +14,7 @@ type St = {
   move: (id: string, s: Status) => void
   note: (id: string, n: string) => void
   toggleDoc: (id: string, d: string) => void
+  reset: () => void
 }
 const upd = (a: App[], id: string, f: (x: App) => App) =>
   a.map((x) => (x.id === id ? f(x) : x))
@@ -49,8 +50,38 @@ export const useApp = create<St>()(
               : [...a.docs, d],
           })),
         })),
+      reset: () => set({ profile: emptyProfile, apps: [] }),
     }),
-    { name: 'grantly-v1' },
+    {
+      name: 'grantly-v1',
+      version: 2,
+      storage: createJSONStorage(() => ({
+        getItem: (name) => {
+          try {
+            const value = localStorage.getItem(name)
+            if (value) JSON.parse(value)
+            return value
+          } catch {
+            try {
+              localStorage.removeItem(name)
+              localStorage.setItem('grantly-storage-reset', '1')
+            } catch {
+              // Storage can be blocked; the in-memory defaults still work.
+            }
+            return null
+          }
+        },
+        setItem: (name, value) => localStorage.setItem(name, value),
+        removeItem: (name) => localStorage.removeItem(name),
+      })),
+      migrate: (persisted) => {
+        const state = persisted as Partial<St>
+        return {
+          profile: state.profile ?? emptyProfile,
+          apps: Array.isArray(state.apps) ? state.apps : [],
+        }
+      },
+    },
   ),
 )
 

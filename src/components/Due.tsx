@@ -1,13 +1,13 @@
-import { daysLeft } from '../match'
+import { daysUntil } from '../lib/dates'
 
 export const isUrgent = (d: string) => {
-  const n = daysLeft(d)
+  const n = daysUntil(d)
   return n >= 0 && n <= 7
 }
 
 /** Deadline text. Within 7 days it becomes a ticket-stub badge with a slow stepped pulse. */
 export function Due({ d }: { d: string }) {
-  const n = daysLeft(d)
+  const n = daysUntil(d)
   const text =
     n < 0
       ? 'Closed'

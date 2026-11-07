@@ -84,3 +84,40 @@ Everything in the brief's priority list, steps 1 to 11, including the bottom-of-
 | muted on surface | 8.86:1 | 9.98:1 |
 | accent text on surface | 5.18:1 | 6.35:1 |
 | on accent | 6.35:1 | 6.35:1 |
+
+## Pass 6 final verification
+
+### Done
+
+- Added [AUDIT.md](./AUDIT.md) with prioritized bugs, hotspots, accessibility gaps, and consistency notes.
+- Hardened persisted Zustand state with version 2 migration, malformed-storage recovery, and a one-time recovery toast.
+- Added a confirm-gated Reset all data action on Profile.
+- Replaced elapsed-time deadline math with local-calendar comparisons and tested today, tomorrow, seven days, and past deadlines.
+- Excluded closed scholarships from Discover deadline filtering and Tracker closing-soon summaries.
+- Made tracker status moves idempotent so repeated moves do not re-fire submission effects.
+- Added Vercel immutable asset caching and no-cache HTML headers.
+- Added `npm run check`, `npm run analyze`, [PITCH.md](./PITCH.md), and [SUBMISSION_CHECKLIST.md](./SUBMISSION_CHECKLIST.md).
+
+### Measured results
+
+- `npm run build`: passed; initial entry JavaScript is approximately 141.47 kB gzip.
+- Lazy route chunks: all below 60 kB gzip; largest is Discover at approximately 4.37 kB gzip.
+- `npm run contrast`: passed; all tested text pairs are at least 4.5:1 in both themes.
+- `npm test -- --run`: passed; 9 tests across four files.
+- `npm run lint`: passed.
+- `npm run analyze`: generated `dist/stats.html` with gzip and Brotli data.
+- Lighthouse, CPU-throttle profiling, deployed-URL checks, and real-device checks were not available in this environment.
+
+### Known bugs and unavailable checks
+
+- Playwright, axe, Lighthouse, CPU-throttle profiling, deployed-URL checks, and real-device checks were not run because no browser automation or deployed URL is available in this environment.
+- Tracker drag-and-drop remains intentionally button-first; the existing dnd-kit packages are not wired into the UI.
+- No backend or network calls are used; all profile, tracker, and preference data stays in browser storage.
+
+### Real-device checklist
+
+- [ ] iPhone Safari
+- [ ] Mid-range Android Chrome
+- [ ] 320px and 200% zoom
+- [ ] Light and dark themes
+- [ ] Screen reader walkthrough

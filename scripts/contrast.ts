@@ -58,8 +58,12 @@ const table = [
 ].join('\n')
 const notes = readFileSync('NOTES.md', 'utf8')
 const marker = '## Pass 5 contrast table'
-const next = notes.includes(marker)
-  ? notes.slice(0, notes.indexOf(marker)) + table
-  : `${notes.trimEnd()}\n\n${table}`
+const start = notes.indexOf(marker)
+const suffixStart =
+  start < 0 ? -1 : notes.indexOf('\n## ', start + marker.length)
+const next =
+  start >= 0
+    ? `${notes.slice(0, start)}${table}${suffixStart >= 0 ? `\n${notes.slice(suffixStart + 1)}` : ''}`
+    : `${notes.trimEnd()}\n\n${table}`
 writeFileSync('NOTES.md', next)
 console.table(rows)

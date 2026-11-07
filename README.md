@@ -10,6 +10,8 @@ npm install
 npm run dev       # http://localhost:5173
 npm run build     # tsc --noEmit + vite build
 npm run contrast  # WCAG token contrast gate and NOTES.md table
+npm run check     # typecheck, lint, tests, contrast and production build
+npm run analyze   # generate dist/stats.html with bundle sizes
 npm run preview
 ```
 
@@ -51,6 +53,7 @@ src/
 ```
 
 All scholarships, providers and amounts are fictional sample data.
+All profile, tracker, and preference data stays in the browser; Grantly makes no analytics or network calls.
 
 ## Performance notes
 
@@ -62,3 +65,4 @@ All scholarships, providers and amounts are fictional sample data.
 - The demo profile is intentionally realistic but fictional and navigates directly to Discover.
 - Print output is intentionally focused on the tracker and hides navigation/actions.
 - Browser Lighthouse and real screen-reader checks require a running browser environment; build, lint, and focused scoring tests are included locally.
+- See [PITCH.md](./PITCH.md) for the demo path and [SUBMISSION_CHECKLIST.md](./SUBMISSION_CHECKLIST.md) for release handoff.
