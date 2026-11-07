@@ -17,4 +17,15 @@ s('10','Alpha Minority Excellence Award','Alpha Minority Trust',55000,27,['Under
 s('11','Ganit Research Starter Grant','Ganit Science Society',150000,85,['PhD'],['Science','Engineering'],{minPct:70}),
 s('12','Vanijya Commerce Leaders Scholarship','Vanijya Chambers',45000,53,['Undergraduate'],['Commerce'],{minPct:70}),
 s('13','OBC Pragati Tuition Support','Pragati Welfare Board',50000,38,['Undergraduate','Postgraduate'],['Any'],{cats:['OBC'],maxIncome:450000}),
-s('14','Nirmaan Engineering Merit-cum-Means','Nirmaan Industries Forum',80000,16,['Undergraduate'],['Engineering'],{minPct:70,maxIncome:500000,states:['Maharashtra','Karnataka','Gujarat']})]
+s('14','Nirmaan Engineering Merit-cum-Means','Nirmaan Industries Forum',80000,16,['Undergraduate'],['Engineering'],{minPct:70,maxIncome:500000,states:['Maharashtra','Karnataka','Gujarat']}),
+// ── 10 new scholarships ──
+s('15','Kiran Women in Medicine Scholarship','Kiran Health Foundation',95000,45,['Undergraduate','Postgraduate'],['Medicine'],{female:true,minPct:70,maxIncome:700000}),
+s('16','Udaan Rural Talent Award','Udaan Social Trust',30000,30,['Class 10-12','Undergraduate'],['Any'],{maxIncome:200000,states:['Uttar Pradesh','Maharashtra']}),
+s('17','Srishti Design and Arts Fellowship','Srishti Creative Labs',65000,90,['Undergraduate','Postgraduate'],['Arts'],{minPct:55}),
+s('18','Neev SC/ST Class 12 Grant','Neev Empowerment Fund',20000,18,['Class 10-12'],['Any'],{cats:['SC','ST'],maxIncome:300000}),
+s('19','Dharitri Environmental Science Prize','Dharitri Green Council',80000,75,['Postgraduate','PhD'],['Science'],{minPct:65}),
+s('20','Lakshya Gujarat Engineering Scholarship','Lakshya Industries Trust',70000,55,['Undergraduate'],['Engineering'],{minPct:75,maxIncome:600000,states:['Gujarat']}),
+s('21','Saraswati Postgraduate Research Grant','Saraswati Academic Society',110000,100,['Postgraduate','PhD'],['Science','Engineering','Medicine'],{minPct:70}),
+s('22','Ankur EWS Commerce Support','Ankur Welfare Trust',35000,40,['Undergraduate'],['Commerce'],{cats:['EWS'],maxIncome:500000,states:['Delhi','Uttar Pradesh']}),
+s('23','Shakti Women in Law Award','Shakti Legal Foundation',85000,65,['Undergraduate','Postgraduate'],['Law'],{female:true,minPct:60}),
+s('24','Pragnya Karnataka Merit Scholarship','Pragnya Education Board',50000,110,['Undergraduate','Postgraduate'],['Any'],{minPct:80,states:['Karnataka']})]

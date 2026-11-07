@@ -5,5 +5,16 @@
 body{@apply bg-mist text-ink font-body antialiased}
 h1,h2,h3{@apply font-head tracking-tight}
 :focus-visible{outline:3px solid #0E7C66;outline-offset:2px}
-.field{@apply w-full rounded-lg border border-line bg-white px-3 py-2 text-sm}
+.field{@apply w-full rounded-lg border border-line bg-white px-3 py-2 text-sm min-h-[40px]}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+/* Range input styling */
+input[type="range"]{@apply cursor-pointer appearance-none bg-transparent}
+input[type="range"]::-webkit-slider-track{@apply h-2 rounded-full bg-line}
+input[type="range"]::-webkit-slider-thumb{@apply appearance-none h-5 w-5 rounded-full bg-teal border-2 border-white shadow-sm}
+input[type="range"]::-moz-range-track{@apply h-2 rounded-full bg-line}
+input[type="range"]::-moz-range-thumb{@apply h-5 w-5 rounded-full bg-teal border-2 border-white shadow-sm}
+
+/* Skeleton pulse */
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+.animate-pulse{animation:pulse 2s cubic-bezier(0.4,0,0.6,1) infinite}
