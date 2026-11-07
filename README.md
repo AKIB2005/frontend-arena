@@ -9,6 +9,7 @@ Built solo for a 6-hour frontend hackathon. Style: softened neo-brutalism (2px i
 npm install
 npm run dev       # http://localhost:5173
 npm run build     # tsc --noEmit + vite build
+npm run contrast  # WCAG token contrast gate and NOTES.md table
 npm run preview
 ```
 
@@ -27,6 +28,7 @@ Deploy on Vercel as-is. `vercel.json` rewrites everything to `index.html` for th
 - **Dark mode** (persisted) and **keyboard shortcuts**: `/` search, `?` help, `g` then `t` tracker, `g` then `d` discover.
 - **Pass 2 polish**: deferred search/filter work, lazy route chunks, Ctrl/Cmd+K command palette, one-click demo profile, scroll progress, optimistic undo, and print-friendly tracker output.
 - **Pass 3 centerpiece**: a live five-scholarship re-rank lab with real matching, stepped rings, score deltas, category chips, woman-applicant control, and reduced-motion-aware autoplay. Returning users land on a dashboard bento view.
+- **Pass 5 polish**: semantic orange accent migration, contrast automation, pop-in/fold-in motion vocabulary, circular route reveal, and deterministic Detail coach guidance.
 - 24 fictional scholarships (10 added, deadlines over the next 4 months).
 
 ## Motion (all under 400ms, none with `prefers-reduced-motion`)
@@ -52,7 +54,7 @@ All scholarships, providers and amounts are fictional sample data.
 
 ## Performance notes
 
-`npm run build` emits route-level chunks and keeps the entry chunk under 170 kB gzip in the current Vite build (about 128 kB gzip). Discover search uses `useDeferredValue`, filters use `useTransition`, and match calculations are memoised once per profile change.
+`npm run build` emits route-level chunks and keeps the entry chunk under 170 kB gzip in the current Vite build (about 141 kB gzip). Discover search uses `useDeferredValue`, filters use `useTransition`, and match calculations are memoised once per profile change.
 
 ## Assumptions
 

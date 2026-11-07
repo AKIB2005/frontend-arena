@@ -12,8 +12,9 @@
   --paper: #f0f0f0;
   --inverse: #0a0a0a;
   --inverse-text: #ffffff;
-  --accent: #2b50ff;
-  --accent-text: #2b50ff;
+  --accent: #ff5a1f;
+  --accent-text: #c2410c;
+  --on-accent: #0a0a0a;
   --fg: #0a0a0a;
   --edge: #0a0a0a;
   --shadow: #0a0a0a;
@@ -26,8 +27,9 @@
   --paper: #171717;
   --inverse: #ffffff;
   --inverse-text: #0a0a0a;
-  --accent: #2b50ff;
-  --accent-text: #8fa2ff;
+  --accent: #ff5a1f;
+  --accent-text: #ff5a1f;
+  --on-accent: #0a0a0a;
   --fg: #ffffff;
   --edge: #ffffff;
   --shadow: #ffffff;
@@ -54,11 +56,11 @@
     text-wrap: balance;
   }
   :focus-visible {
-    outline: 3px solid var(--accent);
+    outline: 3px solid var(--accent-text);
     outline-offset: 2px;
   }
   .dark :focus-visible {
-    outline-color: #8fa2ff;
+    outline-color: var(--accent-text);
   }
   main:focus {
     outline: none;
@@ -177,6 +179,38 @@
     background: var(--surface);
     outline: 2px solid var(--edge);
   }
+  .pop-in {
+    animation: pop-in 380ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+  .fold-in {
+    transform-origin: top;
+    perspective: 800px;
+    animation: fold-in 220ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+  @keyframes pop-in {
+    0% {
+      opacity: 0;
+      transform: scale(0.86);
+    }
+    72% {
+      opacity: 1;
+      transform: scale(1.04);
+    }
+    100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+  @keyframes fold-in {
+    0% {
+      opacity: 0;
+      transform: rotateX(-90deg);
+    }
+    100% {
+      opacity: 1;
+      transform: rotateX(0);
+    }
+  }
   [cmdk-overlay] {
     position: fixed;
     inset: 0;
@@ -217,6 +251,11 @@
     transition: none !important;
     animation: none !important;
     scroll-behavior: auto !important;
+  }
+  .pop-in,
+  .fold-in {
+    animation: none !important;
+    transform: none !important;
   }
 }
 

@@ -3,7 +3,7 @@ import { cn } from '../../lib/utils'
 
 type Tone = 'accent' | 'plain'
 const tones: Record<Tone, string> = {
-  accent: 'bg-accent text-inverse-text',
+  accent: 'bg-accent text-on-accent',
   plain: 'bg-surface text-fg',
 }
 

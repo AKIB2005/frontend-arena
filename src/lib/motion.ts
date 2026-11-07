@@ -3,7 +3,7 @@ import { useUI } from './ui-store'
 
 /** Every animation in Grantly stays under this many seconds. */
 export const MAX = 0.4
-export const DUR = { fast: 0.12, base: 0.2, slow: 0.3 } as const
+export const DUR = { fast: 0.12, base: 0.22, slow: 0.38 } as const
 export const EASE = {
   standard: [0.2, 0.8, 0.2, 1] as const,
   enter: [0.16, 1, 0.3, 1] as const,
@@ -12,6 +12,25 @@ export const EASE = {
 export const SPRING = {
   snappy: { type: 'spring' as const, stiffness: 520, damping: 34, mass: 0.7 },
   soft: { type: 'spring' as const, stiffness: 260, damping: 26, mass: 0.8 },
+  bouncy: { type: 'spring' as const, stiffness: 420, damping: 18, mass: 0.65 },
+}
+
+export const popIn: Variants = {
+  hidden: { opacity: 0, scale: 0.86 },
+  show: (i: number) => ({
+    opacity: 1,
+    scale: [0.86, 1.04, 1],
+    transition: { ...SPRING.bouncy, delay: Math.min(i, 7) * 0.035 },
+  }),
+}
+
+export const foldIn: Variants = {
+  hidden: { opacity: 0, rotateX: -90 },
+  show: {
+    opacity: 1,
+    rotateX: 0,
+    transition: { duration: DUR.base, ease: EASE.enter },
+  },
 }
 
 const instant: Transition = { duration: 0 }

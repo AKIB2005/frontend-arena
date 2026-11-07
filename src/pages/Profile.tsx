@@ -26,7 +26,7 @@ export default function Profile() {
           <SegmentedMeter className="my-3" value={c.filled} max={c.total} segments={c.total} label={`${c.filled} of ${c.total} details added`} />
           <p className="font-bold">{c.filled} of {c.total} details added</p>
           {hints.length > 0 ? (
-            <ul className="mt-3 space-y-2 text-sm">{hints.map(h => <li key={h.key} className="rounded-xl border-2 border-edge bg-accent p-2.5 font-medium text-inverse-text">{h.text}</li>)}</ul>
+            <ul className="mt-3 space-y-2 text-sm">{hints.map(h => <li key={h.key} className="rounded-xl border-2 border-edge bg-accent p-2.5 font-medium text-on-accent">{h.text}</li>)}</ul>
           ) : <p className="mt-2 text-sm text-muted">Every scholarship can be fully checked. Nice.</p>}
         </Card>
         <ButtonLink to="/discover" variant="primary" className="w-full">See my matches</ButtonLink>

@@ -123,7 +123,7 @@ export default function Home() {
             </ButtonLink>
             <button
               type="button"
-              className="min-h-[44px] rounded-xl border-2 border-edge bg-accent px-5 font-bold text-inverse-text shadow-hard transition-[transform,opacity] can-hover:hover:-translate-x-0.5 can-hover:hover:-translate-y-0.5 focus-visible:-translate-x-0.5 focus-visible:-translate-y-0.5 active:translate-x-1 active:translate-y-1 active:shadow-none"
+              className="min-h-[44px] rounded-xl border-2 border-edge bg-accent px-5 font-bold text-on-accent shadow-hard transition-[transform,opacity] can-hover:hover:-translate-x-0.5 can-hover:hover:-translate-y-0.5 focus-visible:-translate-x-0.5 focus-visible:-translate-y-0.5 active:translate-x-1 active:translate-y-1 active:shadow-none"
               onClick={() => {
                 setProfile(DEMO_PROFILE)
                 navigate('/discover')
@@ -193,7 +193,7 @@ export default function Home() {
                       setMinority(category === 'Minority')
                     }}
                     aria-pressed={minority === (category === 'Minority')}
-                    className="min-h-[44px] rounded-xl border-2 border-edge bg-surface px-3 font-bold shadow-hard-sm aria-pressed:bg-accent aria-pressed:text-inverse-text"
+                    className="min-h-[44px] rounded-xl border-2 border-edge bg-surface px-3 font-bold shadow-hard-sm aria-pressed:bg-accent aria-pressed:text-on-accent"
                   >
                     {category}
                   </button>
@@ -226,10 +226,11 @@ export default function Home() {
                   {ranked.map(({ s, m }, index) => (
                     <motion.li
                       key={s.id}
+                      custom={index}
                       layout
                       layoutId={`home-${s.id}`}
                       transition={reduce ? { duration: 0 } : SPRING.soft}
-                      className="relative flex items-center gap-3 rounded-xl border-2 border-edge bg-surface p-3 shadow-hard-sm"
+                      className="pop-in relative flex items-center gap-3 rounded-xl border-2 border-edge bg-surface p-3 shadow-hard-sm"
                     >
                       <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg border-2 border-edge bg-ink font-head font-extrabold text-inverse-text">
                         #{index + 1}

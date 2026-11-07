@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useUI } from '../lib/ui-store'
-import { WIPE, useMotion } from '../lib/motion'
+import { DUR, useMotion } from '../lib/motion'
 import { Confetti } from './Confetti'
 import { HelpDialog } from './HelpDialog'
 import { Stepper } from './Stepper'
@@ -101,6 +101,9 @@ export function Layout({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     document.documentElement.classList.toggle('dark', theme === 'dark')
+    document
+      .querySelector('meta[name="theme-color"]')
+      ?.setAttribute('content', theme === 'dark' ? '#0A0A0A' : '#FFFFFF')
     document.title =
       pathname === '/'
         ? 'Grantly: find scholarships you can actually win'
@@ -144,7 +147,7 @@ export function Layout({ children }: { children: ReactNode }) {
           e.preventDefault()
           main.current?.focus()
         }}
-        className="sr-only z-[80] rounded-xl border-2 border-edge bg-accent px-4 py-2 font-bold text-inverse-text focus:not-sr-only focus:fixed focus:left-3 focus:top-3"
+        className="sr-only z-[80] rounded-xl border-2 border-edge bg-accent px-4 py-2 font-bold text-on-accent focus:not-sr-only focus:fixed focus:left-3 focus:top-3"
       >
         Skip to content
       </a>
@@ -209,45 +212,41 @@ export function Layout({ children }: { children: ReactNode }) {
         </div>
       </header>
       <TooltipPrimitive.Provider delayDuration={120}>
-      <main
-        id="main"
-        ref={main}
-        tabIndex={-1}
-        className="mx-auto w-full max-w-6xl flex-1 px-4 py-8"
-      >
-        <motion.div
-          key={pathname}
-          initial={reduce ? false : { opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.15, duration: 0.01 }}
+        <main
+          id="main"
+          ref={main}
+          tabIndex={-1}
+          className="mx-auto w-full max-w-6xl flex-1 px-4 py-8"
         >
-          {children}
-        </motion.div>
-      </main>
-      <footer className="border-t-2 border-edge bg-surface py-6 text-center text-sm text-muted">
-        Sample data: all scholarships are fictional and for demonstration.
-      </footer>
-      <AnimatePresence>
-        {wipe > 0 && !reduce && (
           <motion.div
-            key={wipe}
-            aria-hidden="true"
-            className="pointer-events-none fixed inset-0 z-[55] border-x-2 border-ink bg-accent"
-            initial={{ x: '-100%' }}
-            animate={{ x: WIPE.x }}
-            transition={{
-              duration: WIPE.duration,
-              times: WIPE.times,
-              ease: 'linear',
-            }}
-            onAnimationComplete={() => setWipe(0)}
-          />
-        )}
-      </AnimatePresence>
-      <Toaster />
-      <Confetti />
-      <HelpDialog />
-      <CommandPalette />
+            key={pathname}
+            initial={reduce ? false : { opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.15, duration: 0.01 }}
+          >
+            {children}
+          </motion.div>
+        </main>
+        <footer className="border-t-2 border-edge bg-surface py-6 text-center text-sm text-muted">
+          Sample data: all scholarships are fictional and for demonstration.
+        </footer>
+        <AnimatePresence>
+          {wipe > 0 && !reduce && (
+            <motion.div
+              key={wipe}
+              aria-hidden="true"
+              className="pointer-events-none fixed inset-0 z-[55] border-4 border-accent bg-surface"
+              initial={{ clipPath: 'circle(0% at 50% 50%)', opacity: 1 }}
+              animate={{ clipPath: 'circle(150% at 50% 50%)', opacity: 0 }}
+              transition={{ duration: DUR.slow, ease: 'easeOut' }}
+              onAnimationComplete={() => setWipe(0)}
+            />
+          )}
+        </AnimatePresence>
+        <Toaster />
+        <Confetti />
+        <HelpDialog />
+        <CommandPalette />
       </TooltipPrimitive.Provider>
     </div>
   )

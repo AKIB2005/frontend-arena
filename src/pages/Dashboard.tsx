@@ -172,7 +172,7 @@ export default function Dashboard() {
                   </Link>
                   <p className="text-sm text-muted">{money(s.amount)}</p>
                 </div>
-                <span className="shrink-0 rounded-lg border-2 border-edge bg-accent px-2 py-1 font-head font-extrabold text-inverse-text">
+                <span className="shrink-0 rounded-lg border-2 border-edge bg-accent px-2 py-1 font-head font-extrabold text-on-accent">
                   {m.score}%
                 </span>
               </li>

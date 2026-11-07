@@ -75,3 +75,12 @@ Everything in the brief's priority list, steps 1 to 11, including the bottom-of-
 - Tracker cards reveal the drag affordance on hover/focus; document checkboxes draw a transform-only completion line and remain native controls.
 - Stepper links keep their labels visible on larger screens, use persistent active styling, and retain keyboard focus rings.
 - Radix command palette and tooltip surfaces are keyboard accessible and close through their native Escape behavior.
+
+## Pass 5 contrast table
+
+| Pair | Light | Dark |
+| --- | ---: | ---: |
+| ink on surface | 19.80:1 | 19.80:1 |
+| muted on surface | 8.86:1 | 9.98:1 |
+| accent text on surface | 5.18:1 | 6.35:1 |
+| on accent | 6.35:1 | 6.35:1 |

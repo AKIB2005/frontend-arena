@@ -188,7 +188,7 @@ export function ChoiceGroup({
               ref={i === 0 ? firstRef : undefined}
               className="peer absolute inset-0 h-full w-full cursor-pointer opacity-0"
             />
-            <span className="inline-flex min-h-[44px] items-center rounded-xl border-2 border-edge bg-surface px-4 py-2 text-base font-bold text-fg shadow-hard-sm transition-[transform,box-shadow] duration-100 peer-checked:bg-accent peer-checked:text-inverse-text peer-checked:shadow-none peer-checked:translate-x-0.5 peer-checked:translate-y-0.5 peer-focus-visible:outline peer-focus-visible:outline-[3px] peer-focus-visible:outline-offset-2 peer-focus-visible:outline-accent">
+            <span className="inline-flex min-h-[44px] items-center rounded-xl border-2 border-edge bg-surface px-4 py-2 text-base font-bold text-fg shadow-hard-sm transition-[transform,box-shadow] duration-100 peer-checked:bg-accent peer-checked:text-on-accent peer-checked:shadow-none peer-checked:translate-x-0.5 peer-checked:translate-y-0.5 peer-focus-visible:outline peer-focus-visible:outline-[3px] peer-focus-visible:outline-offset-2 peer-focus-visible:outline-accent">
               {o.label}
             </span>
           </label>

@@ -49,7 +49,7 @@ export function Stepper() {
                 className={cn(
                   'relative flex min-h-[44px] items-center justify-center gap-2 rounded-xl border-2 border-edge px-2 text-sm font-bold',
                   current
-                    ? 'bg-accent text-inverse-text shadow-hard-sm after:absolute after:bottom-[-6px] after:left-1/4 after:right-1/4 after:h-1 after:bg-accent'
+                    ? 'bg-accent text-on-accent shadow-hard-sm after:absolute after:bottom-[-6px] after:left-1/4 after:right-1/4 after:h-1 after:bg-accent'
                     : 'bg-surface text-fg',
                 )}
               >
@@ -58,7 +58,7 @@ export function Stepper() {
                   className={cn(
                     'grid h-6 w-6 shrink-0 place-items-center rounded-md border-2 border-edge text-xs',
                     done
-                      ? 'bg-accent text-inverse-text'
+                      ? 'bg-accent text-on-accent'
                       : current
                         ? 'bg-ink text-inverse-text'
                         : 'bg-surface',
@@ -75,7 +75,7 @@ export function Stepper() {
                   {st.label}
                 </span>
                 {st.label === 'Track' && apps.length > 0 && (
-                  <span className="rounded-md border-2 border-edge bg-accent px-1.5 text-xs text-inverse-text">
+                  <span className="rounded-md border-2 border-edge bg-accent px-1.5 text-xs text-on-accent">
                     {apps.length}
                     <span className="sr-only"> saved</span>
                   </span>

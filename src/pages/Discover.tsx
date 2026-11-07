@@ -301,7 +301,7 @@ export default function Discover() {
             <button
               type="button"
               onClick={clear}
-              className="min-h-[44px] rounded-xl border-2 border-edge bg-accent px-5 font-bold text-inverse-text shadow-hard active:translate-x-1 active:translate-y-1 active:shadow-none"
+              className="min-h-[44px] rounded-xl border-2 border-edge bg-accent px-5 font-bold text-on-accent shadow-hard active:translate-x-1 active:translate-y-1 active:shadow-none"
             >
               Clear filters
             </button>

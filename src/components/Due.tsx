@@ -26,12 +26,12 @@ export function Due({ d }: { d: string }) {
         aria-label={`${text}; deadline ${exact}`}
         className="ticket group/due relative inline-block [perspective:400px]"
       >
-        <span className="block rounded-lg border-2 border-edge bg-accent px-2 py-0.5 text-sm font-bold text-inverse-text transition-[transform,opacity] duration-200 can-hover:group-hover/due:[transform:rotateX(180deg)] focus:[transform:rotateX(180deg)]">
+        <span className="block rounded-lg border-2 border-edge bg-accent px-2 py-0.5 text-sm font-bold text-on-accent transition-[transform,opacity] duration-200 can-hover:group-hover/due:[transform:rotateX(180deg)] focus:[transform:rotateX(180deg)]">
           ◷ {text}
         </span>
         <span
           aria-hidden="true"
-          className="absolute inset-0 rounded-lg border-2 border-edge bg-accent px-2 py-0.5 text-center text-sm font-bold text-inverse-text opacity-0 transition-[transform,opacity] duration-200 can-hover:group-hover/due:opacity-100 group-focus/due:opacity-100"
+          className="absolute inset-0 rounded-lg border-2 border-edge bg-accent px-2 py-0.5 text-center text-sm font-bold text-on-accent opacity-0 transition-[transform,opacity] duration-200 can-hover:group-hover/due:opacity-100 group-focus/due:opacity-100"
         >
           {exact}
         </span>

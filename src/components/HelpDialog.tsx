@@ -23,7 +23,7 @@ export function HelpDialog() {
       <dl className="space-y-2">
         {ROWS.map(r => (
           <div key={r.text} className="flex items-center justify-between gap-4 rounded-xl border-2 border-edge bg-surface p-3">
-            <dt className="flex gap-1">{r.keys.map((k, i) => <kbd key={i} className="min-w-[2rem] rounded-lg border-2 border-edge bg-accent px-2 py-0.5 text-center font-bold text-inverse-text">{k}</kbd>)}</dt>
+            <dt className="flex gap-1">{r.keys.map((k, i) => <kbd key={i} className="min-w-[2rem] rounded-lg border-2 border-edge bg-accent px-2 py-0.5 text-center font-bold text-on-accent">{k}</kbd>)}</dt>
             <dd className="text-right text-sm">{r.text}</dd>
           </div>
         ))}

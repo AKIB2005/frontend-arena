@@ -13,6 +13,7 @@ import { Button, ButtonLink } from '../components/ui/Button'
 import { Card } from '../components/ui/Card'
 import { Slider } from '../components/ui/Slider'
 import { Sticker } from '../components/ui/Sticker'
+import { coachPlan } from '../lib/coach'
 
 const WORD = { met: 'Met', unmet: 'Not met', unknown: 'Not checked' } as const
 
@@ -45,6 +46,7 @@ export default function Detail() {
   const incMax = Math.max(1500000, (s.maxIncome ?? 0) * 2)
   const hasLevers = !!s.maxIncome || !!s.minPct
   const dirty = what.income !== profile.income || what.pct !== profile.pct
+  const coach = coachPlan(m.checks)
 
   return (
     <article className="mx-auto max-w-3xl">
@@ -122,6 +124,28 @@ export default function Detail() {
           </ButtonLink>
         )}
       </section>
+
+      <Card as="section" aria-labelledby="coach" className="fold-in mt-10">
+        <Sticker tone="accent" rotate={-2} className="mb-3">
+          Coach notes
+        </Sticker>
+        <h2 id="coach" className="text-2xl font-extrabold">
+          Your next best move
+        </h2>
+        <p className="mt-2 max-w-[65ch]">{coach.summary}</p>
+        {coach.missing.length > 0 && (
+          <ul className="mt-3 list-disc space-y-1 pl-5 text-sm text-muted">
+            {coach.missing.map((item) => (
+              <li key={item}>{item}</li>
+            ))}
+          </ul>
+        )}
+        {coach.missing.length > 0 && (
+          <ButtonLink to="/profile" variant="ghost" size="sm" className="mt-4">
+            Update my profile
+          </ButtonLink>
+        )}
+      </Card>
 
       <Card as="section" aria-labelledby="what" className="mt-10">
         <Sticker tone="accent" rotate={2} className="mb-3">
@@ -235,7 +259,7 @@ export default function Detail() {
               <li key={st} className="relative">
                 <span
                   aria-hidden="true"
-                  className="absolute -left-[3.15rem] top-0 grid h-9 w-9 place-items-center rounded-lg border-2 border-edge bg-accent font-head font-extrabold text-inverse-text"
+                  className="absolute -left-[3.15rem] top-0 grid h-9 w-9 place-items-center rounded-lg border-2 border-edge bg-accent font-head font-extrabold text-on-accent"
                 >
                   {i + 1}
                 </span>

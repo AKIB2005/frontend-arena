@@ -12,10 +12,10 @@ const base =
   'disabled:cursor-not-allowed disabled:opacity-60 disabled:shadow-none disabled:hover:translate-x-0 disabled:hover:translate-y-0'
 
 const variants: Record<Variant, string> = {
-  primary: 'bg-accent text-inverse-text',
+  primary: 'bg-accent text-on-accent',
   ink: 'bg-ink text-inverse-text',
   ghost: 'bg-surface text-fg',
-  danger: 'bg-accent text-inverse-text',
+  danger: 'bg-accent text-on-accent',
 }
 const sizes: Record<Size, string> = {
   md: 'min-h-[44px] px-5 py-2 text-base',

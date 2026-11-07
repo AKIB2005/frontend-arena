@@ -12,6 +12,7 @@ export default {
         'inverse-text': 'var(--inverse-text)',
         accent: 'var(--accent)',
         'accent-text': 'var(--accent-text)',
+        'on-accent': 'var(--on-accent)',
         edge: 'var(--edge)',
         fg: 'var(--fg)',
         muted: 'var(--muted)',
