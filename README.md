@@ -202,7 +202,7 @@ Implemented optimizations include lazy route chunks, deferred Discover search, t
 
 ### Prerequisites
 
-Use Node.js `20.19.x`, as pinned in [`.nvmrc`](./.nvmrc) and [`package.json`](./package.json).
+Use Node.js `26.x`, as pinned in [`.nvmrc`](./.nvmrc) and [`package.json`](./package.json).
 
 ### Install
 
