@@ -36,9 +36,15 @@ export function ScholarshipCard({ s, score, checks, onQuickView }: Props) {
         isUrgent(s.deadline) && 'ticket',
       )}
     >
+      {/* Layer order inside the isolated card: shadow (-z-20) < face (-z-10) < content (z-10).
+          Negative-z children paint ABOVE the root background, so the face layer is required. */}
       <span
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 -z-10 translate-x-1 translate-y-1 rounded-xl bg-edge transition-transform duration-200 group-hover/card:translate-x-2 group-hover/card:translate-y-2"
+        className="pointer-events-none absolute inset-0 -z-20 translate-x-1 translate-y-1 rounded-xl bg-edge transition-transform duration-200 group-hover/card:translate-x-2 group-hover/card:translate-y-2"
+      />
+      <span
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 -z-10 rounded-xl bg-surface"
       />
       <Stamp id={s.id} />
       <div className="relative z-10 flex min-h-[12rem] gap-4">

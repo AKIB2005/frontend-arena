@@ -5,7 +5,11 @@ export const isUrgent = (d: string) => {
   return n >= 0 && n <= 7
 }
 
-/** Deadline text. Within 7 days it becomes a ticket-stub badge with a slow stepped pulse. */
+/**
+ * Deadline text. Within 7 days it becomes a ticket-stub badge; on hover (mouse only)
+ * it crossfades to the exact date. The exact date is always available to screen
+ * readers through the visually hidden text, so no extra tab stop or aria-label is needed.
+ */
 export function Due({ d }: { d: string }) {
   const n = daysUntil(d)
   const text =
@@ -21,24 +25,28 @@ export function Due({ d }: { d: string }) {
   })
   if (n <= 7)
     return (
-      <span
-        tabIndex={0}
-        aria-label={`${text}; deadline ${exact}`}
-        className="ticket group/due relative inline-block [perspective:400px]"
-      >
-        <span className="block rounded-lg border-2 border-edge bg-accent px-2 py-0.5 text-sm font-bold text-on-accent transition-[transform,opacity] duration-200 can-hover:group-hover/due:[transform:rotateX(180deg)] focus:[transform:rotateX(180deg)]">
-          ◷ {text}
+      <span className="ticket group/due relative inline-block">
+        <span className="block rounded-lg border-2 border-edge bg-accent px-2 py-0.5 text-sm font-bold text-on-accent transition-opacity duration-200 can-hover:group-hover/due:opacity-0">
+          <span aria-hidden="true">◷ </span>
+          {text}
+          <span className="sr-only">; deadline {exact}</span>
         </span>
         <span
           aria-hidden="true"
-          className="absolute inset-0 rounded-lg border-2 border-edge bg-accent px-2 py-0.5 text-center text-sm font-bold text-on-accent opacity-0 transition-[transform,opacity] duration-200 can-hover:group-hover/due:opacity-100 group-focus/due:opacity-100"
+          className="pointer-events-none absolute inset-0 grid place-items-center rounded-lg border-2 border-edge bg-accent px-2 py-0.5 text-sm font-bold text-on-accent opacity-0 transition-opacity duration-200 can-hover:group-hover/due:opacity-100"
         >
           {exact}
         </span>
       </span>
     )
   return (
-    <span className={n <= 14 ? 'font-bold text-accent' : 'text-muted'}>
+    <span
+      className={
+        n <= 14
+          ? 'font-bold text-[color:var(--accent-text)]'
+          : 'text-muted'
+      }
+    >
       {text}
     </span>
   )

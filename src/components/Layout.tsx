@@ -10,6 +10,20 @@ import { Toaster } from './Toaster'
 import { CommandPalette } from './CommandPalette'
 import * as TooltipPrimitive from '@radix-ui/react-tooltip'
 
+const TITLES: Record<string, string> = {
+  '/': 'Grantly: find scholarships you can actually win',
+  '/dashboard': 'Dashboard | Grantly',
+  '/discover': 'Discover scholarships | Grantly',
+  '/tracker': 'My tracker | Grantly',
+  '/compare': 'Compare scholarships | Grantly',
+  '/profile': 'Your profile | Grantly',
+  '/onboarding': 'Build your profile | Grantly',
+}
+const titleFor = (path: string) =>
+  path.startsWith('/s/')
+    ? 'Scholarship details | Grantly'
+    : (TITLES[path] ?? 'Grantly')
+
 function useShortcuts() {
   const navigate = useNavigate()
   const setHelp = useUI((s) => s.setHelp)
@@ -82,6 +96,9 @@ const Icon = ({ dark }: { dark: boolean }) =>
     </svg>
   )
 
+const motionToggleClass =
+  'min-h-[44px] rounded-xl border-2 border-edge bg-surface px-3 text-sm font-bold shadow-hard-sm aria-pressed:bg-[var(--fill-ink)] aria-pressed:text-[var(--on-ink)]'
+
 export function Layout({ children }: { children: ReactNode }) {
   const { pathname } = useLocation()
   const {
@@ -116,16 +133,7 @@ export function Layout({ children }: { children: ReactNode }) {
     document
       .querySelector('meta[name="theme-color"]')
       ?.setAttribute('content', theme === 'dark' ? '#0A0A0A' : '#FFFFFF')
-    document.title =
-      pathname === '/'
-        ? 'Grantly: find scholarships you can actually win'
-        : pathname === '/dashboard'
-          ? 'Dashboard | Grantly'
-          : pathname === '/discover'
-            ? 'Discover scholarships | Grantly'
-            : pathname === '/tracker'
-              ? 'My tracker | Grantly'
-              : 'Grantly'
+    document.title = titleFor(pathname)
   }, [pathname, theme])
 
   useEffect(() => {
@@ -137,6 +145,16 @@ export function Layout({ children }: { children: ReactNode }) {
     main.current?.focus({ preventScroll: true })
     if (!reduce) setWipe((w) => w + 1)
   }, [pathname, reduce])
+
+  // Safety net: never leave the transition overlay on screen if its animation is interrupted.
+  useEffect(() => {
+    if (wipe === 0) return
+    const id = window.setTimeout(
+      () => setWipe(0),
+      Math.min(DUR.slow * 1000 + 300, 1200),
+    )
+    return () => window.clearTimeout(id)
+  }, [wipe])
 
   useEffect(() => {
     const onScroll = () => {
@@ -188,9 +206,9 @@ export function Layout({ children }: { children: ReactNode }) {
                 type="button"
                 onClick={() => setCommandOpen(true)}
                 aria-label="Open command palette"
-                className="grid h-11 w-11 place-items-center rounded-xl border-2 border-edge bg-surface font-bold shadow-hard-sm"
+                className="grid h-11 w-11 place-items-center rounded-xl border-2 border-edge bg-surface font-bold shadow-hard-sm active:translate-x-0.5 active:translate-y-0.5 active:shadow-none"
               >
-                ⌘
+                <span aria-hidden="true">⌘</span>
               </button>
               <button
                 type="button"
@@ -213,10 +231,9 @@ export function Layout({ children }: { children: ReactNode }) {
                 type="button"
                 onClick={toggleReduceMotion}
                 aria-pressed={reduceMotion}
-                aria-label="Reduce motion"
-                className="hidden min-h-[44px] rounded-xl border-2 border-edge bg-surface px-3 text-sm font-bold shadow-hard-sm sm:block"
+                className={`hidden sm:block ${motionToggleClass}`}
               >
-                {reduceMotion ? 'Still' : 'Motion'}
+                Reduce motion
               </button>
             </div>
           </div>
@@ -239,8 +256,18 @@ export function Layout({ children }: { children: ReactNode }) {
             {children}
           </motion.div>
         </main>
-        <footer className="border-t-2 border-edge bg-surface py-6 text-center text-sm text-muted">
-          Sample data: all scholarships are fictional and for demonstration.
+        <footer className="border-t-2 border-edge bg-surface px-4 py-6 text-center text-sm text-muted">
+          <p>
+            Sample data: all scholarships are fictional and for demonstration.
+          </p>
+          <button
+            type="button"
+            onClick={toggleReduceMotion}
+            aria-pressed={reduceMotion}
+            className={`mt-3 text-fg ${motionToggleClass}`}
+          >
+            Reduce motion
+          </button>
         </footer>
         <AnimatePresence>
           {wipe > 0 && !reduce && (
