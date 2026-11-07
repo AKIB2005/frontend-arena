@@ -1,92 +1,62 @@
 # Grantly
 
-**Rethinking the Scholarship Experience** — a calm, clear scholarship discovery and tracking app built for THE OUTPOST hackathon.
-
-## Problem
-
-Finding scholarships is overwhelming. Students waste hours scrolling through lists, unsure which ones they qualify for. Grantly solves this by showing a personalised match score on every scholarship, highlighting exactly which criteria are met, unmet, or unknown.
-
-## Approach
-
-- **Match-first design**: Every scholarship shows a score ring — the single memorable element. Everything else stays quiet so a stressed student can focus.
-- **Guided onboarding**: A 4-step wizard (Study → You → Money & marks → Review) builds the profile in under 2 minutes. Skip any step and come back later.
-- **Journey stepper**: The navbar shows where you are — Profile, Discover, Apply, Track — and collapses to dots on mobile.
-- **Quick-view drawer**: See eligibility details and compare up to 3 scholarships without leaving the Discover page.
-- **Application tracker**: Kanban-style columns (Saved → Applying → Submitted → Result) with document checklists, notes, and an animated funding counter.
-- **Accessible by default**: Skip-to-content link, focus rings, ARIA landmarks, keyboard navigation, 40px+ tap targets, reduced-motion support.
-
-## Features
-
-- Landing hero with live interactive demo (sliders change the match score in real time)
-- 24 fictional scholarships with varied eligibility criteria
-- Profile-aware match scoring (met / unmet / unknown)
-- Filtering by level, deadline, text search, and "strong matches only"
-- Animated page transitions, staggered card entrances, ring fill animation
-- Toast notifications for tracker actions
-- Skeleton loaders on first Discover render
-- Responsive at 375px, 768px, and 1280px
-- Full keyboard accessibility and screen reader support
-
-## Stack
-
-- **Vite** + **React 18** + **TypeScript** (strict)
-- **Tailwind CSS v3** — custom palette (ink, mist, teal, sun, rose) + Bricolage Grotesque / DM Sans fonts
-- **React Router v6** — SPA routing with Vercel rewrite
-- **Zustand** — persisted to localStorage (`grantly-v1`)
-- **Framer Motion** — page transitions, ring animation, layout animation, staggered cards
-- **clsx** + **tailwind-merge** — utility class composition via `cn()`
+Scholarship discovery and tracking for students. Every scholarship shows a personal match score, what you meet, what you miss, and how to fix it.
+Built solo for a 6-hour frontend hackathon. Style: softened neo-brutalism (2px ink borders, hard offset shadows, flat colour, sticker badges).
 
 ## Run
 
 ```bash
 npm install
-npm run dev       # opens at http://localhost:5173
-npm run build     # TypeScript check + production build
-npm run preview   # preview the production build
+npm run dev       # http://localhost:5173
+npm run build     # tsc --noEmit + vite build
+npm run preview
 ```
 
-Deploy: import on Vercel — `vercel.json` handles SPA routing.
+Deploy on Vercel as-is. `vercel.json` rewrites everything to `index.html` for the SPA routes.
 
-## Project structure
+## Features
+
+- **Home**: live sample card. Sliders and a toggle recompute the score; the checklist punches in item by item.
+- **Journey stepper** (Profile, Discover, Apply, Track) with `aria-current="step"` and a tracker count.
+- **Onboarding**: 4 steps, segmented progress bar, inline accessible validation, skip, saves as you go.
+- **Profile**: edit anytime, completeness meter, hints like "Add your percentage to check 3 more scholarships".
+- **Discover**: search, level/field/category filters, deadline window, strong matches only, sort, quick-view drawer, compare picker with sticky bar.
+- **Detail**: eligibility first, a "how to fix" hint on every unmet item, "What would change my score?" sliders (not saved), documents, steps as a timeline.
+- **Compare**: up to 3 side by side.
+- **Tracker**: funding meter and odometer, 4 columns, document checklist and notes, "Gather these documents first" ranking, 30-day deadline strip, `.ics` download, undo after Remove.
+- **Dark mode** (persisted) and **keyboard shortcuts**: `/` search, `?` help, `g` then `t` tracker, `g` then `d` discover.
+- **Pass 2 polish**: deferred search/filter work, lazy route chunks, Ctrl/Cmd+K command palette, one-click demo profile, scroll progress, optimistic undo, and print-friendly tracker output.
+- **Pass 3 centerpiece**: a live five-scholarship re-rank lab with real matching, stepped rings, score deltas, category chips, woman-applicant control, and reduced-motion-aware autoplay. Returning users land on a dashboard bento view.
+- 24 fictional scholarships (10 added, deadlines over the next 4 months).
+
+## Motion (all under 400ms, none with `prefers-reduced-motion`)
+
+RatchetRing (stepped fill + count-up), Stamp, TicketTear (dashed edge + stepped pulse for deadlines within 7 days), BlockWipe route transition, SegmentedMeter, square confetti (once per session), staggered first-load cards, skeletons, kanban layout animation, funding odometer.
+
+## Stack
+
+Vite, React 18, TypeScript (strict), Tailwind v3, React Router v6, Zustand (persisted as `grantly-v1`), Framer Motion 11, cmdk, Radix primitives, dnd-kit, Vitest, clsx + tailwind-merge v2.
+
+## Structure
 
 ```
 src/
-├── components/
-│   ├── ui/          # Button, Badge, Field (reusable primitives)
-│   ├── Card.tsx     # Scholarship card with Ring + actions
-│   ├── Due.tsx      # Deadline badge
-│   ├── Layout.tsx   # Shell with navbar, journey stepper, footer
-│   ├── ProfileForm.tsx
-│   ├── QuickViewDrawer.tsx
-│   ├── Ring.tsx      # Match score ring (animated)
-│   ├── Skeleton.tsx  # Card loading skeleton
-│   └── Toast.tsx     # Notification toast system
-├── pages/
-│   ├── Home.tsx       # Landing hero with interactive demo
-│   ├── Discover.tsx   # Scholarship list with filters
-│   ├── Detail.tsx     # Full scholarship page
-│   ├── Tracker.tsx    # Kanban application tracker
-│   ├── Onboarding.tsx # 4-step profile wizard
-│   └── Profile.tsx    # Edit profile page
-├── lib/
-│   ├── motion.ts     # Framer Motion variants + helpers
-│   └── utils.ts      # cn() class utility
-├── App.tsx           # Routing only
-├── data.ts           # 24 fictional scholarships
-├── match.ts          # Match scoring logic (unchanged)
-├── store.ts          # Zustand store (unchanged)
-├── main.tsx          # Entry point
-└── index.css         # Tailwind directives + custom styles
+  components/   Layout, Stepper, RatchetRing, Stamp, SegmentedMeter, Dialog, QuickView, ...
+    ui/         Button, Card, Badge, Field, Sticker, Slider
+  pages/        Home, Onboarding, Discover, Detail, Compare, Tracker, Profile
+  lib/          motion, hooks, hints, ics, actions, ui-store, options, utils
+  match.ts      scoring (unchanged)    data.ts  24 scholarships    store.ts  Zustand store
 ```
+
+All scholarships, providers and amounts are fictional sample data.
+
+## Performance notes
+
+`npm run build` emits route-level chunks and keeps the entry chunk under 170 kB gzip in the current Vite build (about 128 kB gzip). Discover search uses `useDeferredValue`, filters use `useTransition`, and match calculations are memoised once per profile change.
 
 ## Assumptions
 
-- All scholarship data is fictional sample data — see `src/data.ts`
-- Match logic treats unknown profile fields as "not penalised" (score = met / judgeable)
-- Deadlines are relative to today (`Date.now() + n days`) so they always appear fresh
-- The app is client-side only with localStorage persistence; no backend
-- "Apply" step in the journey stepper is a future feature placeholder (links to Discover)
-
-## Sample data note
-
-All scholarships, providers, and amounts are fictional and created for demonstration purposes only.
+- The existing fictional data and scoring contract remain authoritative; `src/match.ts` was not changed.
+- The demo profile is intentionally realistic but fictional and navigates directly to Discover.
+- Print output is intentionally focused on the tracker and hides navigation/actions.
+- Browser Lighthouse and real screen-reader checks require a running browser environment; build, lint, and focused scoring tests are included locally.

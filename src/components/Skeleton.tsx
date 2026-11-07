@@ -1,19 +1,14 @@
-import { cn } from '../lib/utils'
-
-const skeletonBase = 'animate-pulse rounded-lg bg-line/60'
-
 export function CardSkeleton() {
   return (
-    <div className="flex gap-4 rounded-xl border border-line bg-white p-5" aria-hidden>
-      <div className={cn(skeletonBase, 'h-16 w-16 rounded-full')} />
-      <div className="flex flex-1 flex-col gap-2">
-        <div className={cn(skeletonBase, 'h-5 w-3/4')} />
-        <div className={cn(skeletonBase, 'h-4 w-1/2')} />
-        <div className={cn(skeletonBase, 'mt-2 h-5 w-1/3')} />
-        <div className="mt-2 flex gap-2">
-          <div className={cn(skeletonBase, 'h-8 w-28 rounded-full')} />
-          <div className={cn(skeletonBase, 'h-8 w-20 rounded-full')} />
-        </div>
+    <div
+      aria-hidden="true"
+      className="flex animate-pulse gap-4 rounded-xl border-2 border-edge bg-surface p-5 shadow-hard"
+    >
+      <div className="h-[72px] w-[72px] shrink-0 rounded-full border-2 border-edge bg-paper" />
+      <div className="flex-1 space-y-3">
+        <div className="h-5 w-3/4 rounded-md bg-paper" />
+        <div className="h-4 w-1/2 rounded-md bg-paper" />
+        <div className="h-10 w-2/3 rounded-xl bg-paper" />
       </div>
     </div>
   )

@@ -1,35 +1,59 @@
+import { forwardRef, type ButtonHTMLAttributes } from 'react'
+import { Link, type LinkProps } from 'react-router-dom'
 import { cn } from '../../lib/utils'
 
-type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'sun'
+type Variant = 'primary' | 'ink' | 'ghost' | 'danger'
+type Size = 'md' | 'sm'
 
-interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: ButtonVariant
-  as?: 'button'
+const base =
+  'group relative inline-flex items-center justify-center gap-2 overflow-hidden rounded-xl border-2 border-edge font-bold leading-tight transition-[transform,opacity] duration-100 ' +
+  'shadow-hard can-hover:hover:-translate-x-0.5 can-hover:hover:-translate-y-0.5 ' +
+  'active:translate-x-1 active:translate-y-1 active:shadow-none ' +
+  'disabled:cursor-not-allowed disabled:opacity-60 disabled:shadow-none disabled:hover:translate-x-0 disabled:hover:translate-y-0'
+
+const variants: Record<Variant, string> = {
+  primary: 'bg-accent text-inverse-text',
+  ink: 'bg-ink text-inverse-text',
+  ghost: 'bg-surface text-fg',
+  danger: 'bg-accent text-inverse-text',
+}
+const sizes: Record<Size, string> = {
+  md: 'min-h-[44px] px-5 py-2 text-base',
+  sm: 'min-h-[44px] px-4 py-1.5 text-sm',
 }
 
-interface LinkButtonProps extends React.AnchorHTMLAttributes<HTMLAnchorElement> {
-  variant?: ButtonVariant
-  as: 'a'
+/** Class string for anything that should look like a Grantly button. */
+export const btn = (
+  variant: Variant = 'primary',
+  size: Size = 'md',
+  extra?: string,
+) => cn(base, variants[variant], sizes[size], extra)
+
+type BtnProps = ButtonHTMLAttributes<HTMLButtonElement> & {
+  variant?: Variant
+  size?: Size
 }
 
-const base = 'inline-flex items-center justify-center gap-2 rounded-full px-5 py-2.5 text-sm font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal disabled:opacity-40 disabled:pointer-events-none'
+export const Button = forwardRef<HTMLButtonElement, BtnProps>(function Button(
+  { variant = 'primary', size = 'md', className, type = 'button', ...rest },
+  ref,
+) {
+  return (
+    <button
+      ref={ref}
+      type={type}
+      className={btn(variant, size, className)}
+      {...rest}
+    />
+  )
+})
 
-const variants: Record<ButtonVariant, string> = {
-  primary: 'bg-ink text-white hover:bg-ink/90',
-  secondary: 'border border-line bg-white text-ink hover:bg-mist',
-  ghost: 'text-ink hover:bg-white',
-  sun: 'bg-sun text-ink font-bold hover:bg-sun/90',
-}
-
-export function Button(props: ButtonProps | LinkButtonProps) {
-  const { variant = 'primary', className, ...rest } = props
-  const cls = cn(base, variants[variant], className)
-
-  if (props.as === 'a') {
-    const { as: _, variant: _v, ...aProps } = props as LinkButtonProps
-    return <a className={cls} {...aProps} />
-  }
-
-  const { as: _, variant: _v, ...bProps } = props as ButtonProps
-  return <button className={cls} {...bProps} />
+type LinkBtnProps = LinkProps & { variant?: Variant; size?: Size }
+export function ButtonLink({
+  variant = 'primary',
+  size = 'md',
+  className,
+  ...rest
+}: LinkBtnProps) {
+  return <Link className={btn(variant, size, className)} {...rest} />
 }

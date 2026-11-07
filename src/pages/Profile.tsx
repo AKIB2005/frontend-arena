@@ -1,61 +1,37 @@
-import { motion, useReducedMotion } from 'framer-motion'
-import { useApp } from '../store'
-import { type Profile } from '../match'
-import { ProfileForm } from '../components/ProfileForm'
-import { pageVariants } from '../lib/motion'
-import { Link } from 'react-router-dom'
+import {useApp} from '../store'
+import {completeness, profileHints} from '../lib/hints'
+import {ProfileForm} from '../components/ProfileForm'
+import {SegmentedMeter} from '../components/SegmentedMeter'
+import {ButtonLink} from '../components/ui/Button'
+import {Card} from '../components/ui/Card'
+import {TextInput} from '../components/ui/Field'
 
-export default function ProfilePage() {
-  const { profile, setProfile } = useApp()
-  const prefersReduced = useReducedMotion()
-  const hasProfile = !!(profile.level || profile.field)
-
-  const clearProfile = () => {
-    setProfile({
-      name: '',
-      level: '',
-      field: '',
-      cat: '',
-      gender: '' as Profile['gender'],
-      state: '',
-      income: null,
-      pct: null,
-    })
-  }
-
+export default function Profile() {
+  const {profile, setProfile} = useApp()
+  const c = completeness(profile)
+  const hints = profileHints(profile).slice(0, 4)
   return (
-    <motion.div
-      className="mx-auto max-w-3xl"
-      variants={prefersReduced ? undefined : pageVariants}
-      initial="initial"
-      animate="animate"
-      exit="exit"
-    >
-      <h1 className="text-3xl font-extrabold">Your profile</h1>
-      <p className="mt-2 text-soft">
-        Update your details to keep your match scores accurate. Changes apply instantly.
-      </p>
-
-      <section className="mt-6 rounded-xl border border-line bg-white p-5">
-        <ProfileForm />
-      </section>
-
-      <div className="mt-6 flex flex-wrap gap-3">
-        <Link
-          to="/discover"
-          className="rounded-full bg-teal px-5 py-2.5 text-sm font-bold text-white hover:bg-teal/90 min-h-[44px] inline-flex items-center"
-        >
-          See my scholarships
-        </Link>
-        {hasProfile && (
-          <button
-            onClick={clearProfile}
-            className="rounded-full border border-line px-5 py-2.5 text-sm font-medium text-rose hover:bg-rose/5 min-h-[44px]"
-          >
-            Clear profile
-          </button>
-        )}
+    <div className="mx-auto grid max-w-5xl gap-6 lg:grid-cols-[1fr_20rem]">
+      <div>
+        <h1 className="text-4xl font-extrabold">Your profile</h1>
+        <p className="mb-6 mt-2 text-muted">Changes save as you type and update every match score straight away.</p>
+        <Card className="space-y-6">
+          <TextInput label="Your name (optional)" value={profile.name} onChange={e => setProfile({name: e.target.value})} wrapClass="max-w-sm" />
+          <ProfileForm fields={['level', 'field', 'cat', 'gender', 'state', 'income', 'pct']} />
+        </Card>
       </div>
-    </motion.div>
+      <aside aria-label="Profile progress" className="space-y-5 lg:pt-[4.5rem]">
+        <Card>
+          <h2 className="text-xl font-extrabold">Profile completeness</h2>
+          <SegmentedMeter className="my-3" value={c.filled} max={c.total} segments={c.total} label={`${c.filled} of ${c.total} details added`} />
+          <p className="font-bold">{c.filled} of {c.total} details added</p>
+          {hints.length > 0 ? (
+            <ul className="mt-3 space-y-2 text-sm">{hints.map(h => <li key={h.key} className="rounded-xl border-2 border-edge bg-accent p-2.5 font-medium text-inverse-text">{h.text}</li>)}</ul>
+          ) : <p className="mt-2 text-sm text-muted">Every scholarship can be fully checked. Nice.</p>}
+        </Card>
+        <ButtonLink to="/discover" variant="primary" className="w-full">See my matches</ButtonLink>
+        <ButtonLink to="/onboarding" variant="ghost" className="w-full">Use the guided setup</ButtonLink>
+      </aside>
+    </div>
   )
 }

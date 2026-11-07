@@ -1,50 +1,58 @@
+import {
+  useId,
+  type ChangeEvent,
+  type InputHTMLAttributes,
+  type ReactNode,
+  type SelectHTMLAttributes,
+} from 'react'
 import { cn } from '../../lib/utils'
 
-interface FieldProps {
-  id: string
+export const controlClass =
+  'w-full min-h-[44px] rounded-xl border-2 border-edge bg-surface px-3 py-2 text-base text-fg placeholder:text-muted aria-[invalid=true]:border-accent'
+
+type FieldProps = {
   label: string
-  srOnly?: boolean
+  hint?: string
   error?: string
+  children: (a: {
+    id: string
+    describedBy?: string
+    invalid: boolean
+  }) => ReactNode
+  srOnly?: boolean
   className?: string
-  children?: React.ReactNode
 }
 
-interface InputFieldProps extends FieldProps {
-  type?: 'text' | 'number' | 'email'
-  value: string | number | ''
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void
-  placeholder?: string
-  min?: number
-  max?: number
-}
-
-interface SelectFieldProps extends FieldProps {
-  value: string
-  onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void
-  options: string[]
-  placeholder?: string
-}
-
-export function InputField({ id, label, srOnly, error, className, type = 'text', value, onChange, placeholder, min, max }: InputFieldProps) {
+/** Label + control + hint + inline error, wired with aria-describedby. */
+export function Field({
+  label,
+  hint,
+  error,
+  children,
+  srOnly,
+  className,
+}: FieldProps) {
+  const id = useId()
+  const hid = `${id}-h`,
+    eid = `${id}-e`
+  const describedBy =
+    [hint && hid, error && eid].filter(Boolean).join(' ') || undefined
   return (
     <div className={className}>
-      <label htmlFor={id} className={cn('mb-1 block text-sm font-medium', srOnly && 'sr-only')}>
+      <label
+        htmlFor={id}
+        className={cn('mb-1 block text-sm font-bold', srOnly && 'sr-only')}
+      >
         {label}
       </label>
-      <input
-        id={id}
-        type={type}
-        className={cn('field', error && 'border-rose')}
-        value={value}
-        onChange={onChange}
-        placeholder={placeholder}
-        min={min}
-        max={max}
-        aria-invalid={error ? true : undefined}
-        aria-describedby={error ? `${id}-err` : undefined}
-      />
+      {children({ id, describedBy, invalid: !!error })}
+      {hint && (
+        <p id={hid} className="mt-1 text-sm text-muted">
+          {hint}
+        </p>
+      )}
       {error && (
-        <p id={`${id}-err`} className="mt-1 text-sm text-rose" role="alert">
+        <p id={eid} role="alert" className="mt-1 text-sm font-bold text-accent">
           {error}
         </p>
       )}
@@ -52,30 +60,154 @@ export function InputField({ id, label, srOnly, error, className, type = 'text',
   )
 }
 
-export function SelectField({ id, label, srOnly, error, className, value, onChange, options, placeholder = 'Select' }: SelectFieldProps) {
+type InputProps = InputHTMLAttributes<HTMLInputElement> & {
+  label: string
+  hint?: string
+  error?: string
+  srOnly?: boolean
+  wrapClass?: string
+}
+export function TextInput({
+  label,
+  hint,
+  error,
+  srOnly,
+  wrapClass,
+  className,
+  ...rest
+}: InputProps) {
   return (
-    <div className={className}>
-      <label htmlFor={id} className={cn('mb-1 block text-sm font-medium', srOnly && 'sr-only')}>
-        {label}
-      </label>
-      <select
-        id={id}
-        className={cn('field', error && 'border-rose')}
-        value={value}
-        onChange={onChange}
-        aria-invalid={error ? true : undefined}
-        aria-describedby={error ? `${id}-err` : undefined}
-      >
-        <option value="">{placeholder}</option>
-        {options.map(o => (
-          <option key={o}>{o}</option>
+    <Field
+      label={label}
+      hint={hint}
+      error={error}
+      srOnly={srOnly}
+      className={wrapClass}
+    >
+      {({ id, describedBy, invalid }) => (
+        <input
+          id={id}
+          aria-describedby={describedBy}
+          aria-invalid={invalid}
+          className={cn(controlClass, className)}
+          {...rest}
+        />
+      )}
+    </Field>
+  )
+}
+
+type SelectProps = SelectHTMLAttributes<HTMLSelectElement> & {
+  label: string
+  options: string[]
+  placeholder?: string
+  hint?: string
+  error?: string
+  srOnly?: boolean
+  wrapClass?: string
+}
+export function Select({
+  label,
+  options,
+  placeholder = 'Select',
+  hint,
+  error,
+  srOnly,
+  wrapClass,
+  className,
+  ...rest
+}: SelectProps) {
+  return (
+    <Field
+      label={label}
+      hint={hint}
+      error={error}
+      srOnly={srOnly}
+      className={wrapClass}
+    >
+      {({ id, describedBy, invalid }) => (
+        <select
+          id={id}
+          aria-describedby={describedBy}
+          aria-invalid={invalid}
+          className={cn(controlClass, className)}
+          {...rest}
+        >
+          <option value="">{placeholder}</option>
+          {options.map((o) => (
+            <option key={o} value={o}>
+              {o}
+            </option>
+          ))}
+        </select>
+      )}
+    </Field>
+  )
+}
+
+type ChoiceProps = {
+  legend: string
+  name: string
+  options: { value: string; label: string }[]
+  value: string
+  onChange: (v: string) => void
+  error?: string
+  hint?: string
+  firstRef?: (el: HTMLInputElement | null) => void
+}
+/** Chunky radio chips. Real radios underneath so arrow keys and screen readers just work. */
+export function ChoiceGroup({
+  legend,
+  name,
+  options,
+  value,
+  onChange,
+  error,
+  hint,
+  firstRef,
+}: ChoiceProps) {
+  const id = useId()
+  const describedBy =
+    [hint && `${id}-h`, error && `${id}-e`].filter(Boolean).join(' ') ||
+    undefined
+  return (
+    <fieldset aria-describedby={describedBy}>
+      <legend className="mb-2 text-sm font-bold">{legend}</legend>
+      <div className="flex flex-wrap gap-2">
+        {options.map((o, i) => (
+          <label key={o.value} className="relative">
+            <input
+              type="radio"
+              name={name}
+              value={o.value}
+              checked={value === o.value}
+              onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                onChange(e.target.value)
+              }
+              aria-invalid={!!error}
+              ref={i === 0 ? firstRef : undefined}
+              className="peer absolute inset-0 h-full w-full cursor-pointer opacity-0"
+            />
+            <span className="inline-flex min-h-[44px] items-center rounded-xl border-2 border-edge bg-surface px-4 py-2 text-base font-bold text-fg shadow-hard-sm transition-[transform,box-shadow] duration-100 peer-checked:bg-accent peer-checked:text-inverse-text peer-checked:shadow-none peer-checked:translate-x-0.5 peer-checked:translate-y-0.5 peer-focus-visible:outline peer-focus-visible:outline-[3px] peer-focus-visible:outline-offset-2 peer-focus-visible:outline-accent">
+              {o.label}
+            </span>
+          </label>
         ))}
-      </select>
+      </div>
+      {hint && (
+        <p id={`${id}-h`} className="mt-2 text-sm text-muted">
+          {hint}
+        </p>
+      )}
       {error && (
-        <p id={`${id}-err`} className="mt-1 text-sm text-rose" role="alert">
+        <p
+          id={`${id}-e`}
+          role="alert"
+          className="mt-2 text-sm font-bold text-accent"
+        >
           {error}
         </p>
       )}
-    </div>
+    </fieldset>
   )
 }

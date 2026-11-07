@@ -1,22 +1,25 @@
+import type { HTMLAttributes } from 'react'
 import { cn } from '../../lib/utils'
 
-interface BadgeProps {
-  children: React.ReactNode
-  variant?: 'default' | 'sun' | 'teal' | 'rose'
-  className?: string
+type Tone = 'accent' | 'plain'
+const tones: Record<Tone, string> = {
+  accent: 'bg-accent text-inverse-text',
+  plain: 'bg-surface text-fg',
 }
 
-const variants = {
-  default: 'bg-mist text-ink',
-  sun: 'bg-sun text-ink',
-  teal: 'bg-teal text-white',
-  rose: 'bg-rose text-white',
-}
-
-export function Badge({ children, variant = 'default', className }: BadgeProps) {
+export function Badge({
+  tone = 'plain',
+  className,
+  ...rest
+}: HTMLAttributes<HTMLSpanElement> & { tone?: Tone }) {
   return (
-    <span className={cn('inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium', variants[variant], className)}>
-      {children}
-    </span>
+    <span
+      className={cn(
+        'inline-flex items-center rounded-lg border-2 border-edge px-2 py-0.5 text-xs font-bold leading-tight',
+        tones[tone],
+        className,
+      )}
+      {...rest}
+    />
   )
 }

@@ -1,154 +1,250 @@
+import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { motion, useReducedMotion } from 'framer-motion'
 import { DATA } from '../data'
 import { match, money } from '../match'
 import { useApp } from '../store'
-import { Ring } from '../components/Ring'
+import { fixHint } from '../lib/hints'
+import { useActions } from '../lib/actions'
+import { CheckRow } from '../components/CheckRow'
 import { Due } from '../components/Due'
-import { showToast } from '../components/Toast'
-import { pageVariants } from '../lib/motion'
+import { RatchetRing } from '../components/RatchetRing'
+import { Stamp } from '../components/Stamp'
+import { Button, ButtonLink } from '../components/ui/Button'
+import { Card } from '../components/ui/Card'
+import { Slider } from '../components/ui/Slider'
+import { Sticker } from '../components/ui/Sticker'
 
-const ICON = {
-  met: ['✓', 'bg-teal text-white', 'Met'],
-  unmet: ['✕', 'bg-rose text-white', 'Not met'],
-  unknown: ['?', 'bg-sun text-ink', 'Add to your profile'],
-} as const
+const WORD = { met: 'Met', unmet: 'Not met', unknown: 'Not checked' } as const
 
 export default function Detail() {
   const { id } = useParams()
-  const s = DATA.find(x => x.id === id)
-  const { profile, apps, add } = useApp()
-  const prefersReduced = useReducedMotion()
-
-  if (!s) {
+  const s = DATA.find((x) => x.id === id)
+  const { profile, apps } = useApp()
+  const { save } = useActions()
+  const [what, setWhat] = useState<{
+    income: number | null
+    pct: number | null
+  }>({ income: profile.income, pct: profile.pct })
+  if (!s)
     return (
-      <div className="rounded-xl border border-dashed border-line bg-white p-10 text-center">
-        <p className="font-bold">Scholarship not found.</p>
-        <p className="mt-1 text-soft">
-          It may have been removed.{' '}
-          <Link to="/discover" className="underline text-teal">
-            Back to discover
-          </Link>
-        </p>
-      </div>
+      <Card>
+        <h1 className="text-2xl font-extrabold">Scholarship not found</h1>
+        <ButtonLink to="/discover" className="mt-4">
+          Back to scholarships
+        </ButtonLink>
+      </Card>
     )
-  }
 
   const m = match(s, profile)
-  const saved = apps.some(a => a.id === s.id)
-
-  const handleAdd = () => {
-    add(s.id)
-    showToast('Saved to your tracker')
-  }
+  const saved = apps.some((a) => a.id === s.id)
+  const scenario = match(s, { ...profile, income: what.income, pct: what.pct })
+  const delta = scenario.score - m.score
+  const changed = scenario.checks.filter(
+    (c, i) => c.status !== m.checks[i].status,
+  )
+  const incMax = Math.max(1500000, (s.maxIncome ?? 0) * 2)
+  const hasLevers = !!s.maxIncome || !!s.minPct
+  const dirty = what.income !== profile.income || what.pct !== profile.pct
 
   return (
-    <motion.article
-      className="max-w-3xl"
-      variants={prefersReduced ? undefined : pageVariants}
-      initial="initial"
-      animate="animate"
-      exit="exit"
-    >
-      <Link to="/discover" className="text-sm font-medium underline">
+    <article className="mx-auto max-w-3xl">
+      <Link
+        to="/discover"
+        className="inline-flex min-h-[44px] items-center font-bold underline underline-offset-2"
+      >
         Back to all scholarships
       </Link>
 
-      <div className="mt-4 flex flex-col sm:flex-row items-start gap-5">
-        <Ring v={m.score} size={96} animate />
-        <div>
-          <h1 className="text-3xl font-extrabold">{s.name}</h1>
-          <p className="text-soft">{s.provider}</p>
-          <p className="mt-2">
-            <span className="font-head text-2xl font-bold">{money(s.amount)}</span>
-            <span className="text-soft">
-              {' '}
-              · Deadline{' '}
-              {new Date(s.deadline).toLocaleDateString('en-IN', {
-                day: 'numeric',
-                month: 'short',
-                year: 'numeric',
-              })}{' '}
-              ·{' '}
-            </span>
-            <Due d={s.deadline} />
-          </p>
+      <Card className="relative mt-2">
+        <Stamp id={s.id} />
+        <div className="flex flex-wrap items-start gap-5">
+          <RatchetRing value={m.score} size={104} />
+          <div className="min-w-0 flex-1">
+            <h1 className="text-3xl font-extrabold leading-tight sm:text-4xl">
+              {s.name}
+            </h1>
+            <p className="text-muted">{s.provider}</p>
+            <p className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1">
+              <span className="font-head text-2xl font-extrabold">
+                {money(s.amount)}
+              </span>
+              <span className="text-muted">
+                Closes{' '}
+                {new Date(s.deadline).toLocaleDateString('en-IN', {
+                  day: 'numeric',
+                  month: 'short',
+                  year: 'numeric',
+                })}
+              </span>
+              <Due d={s.deadline} />
+            </p>
+          </div>
         </div>
-      </div>
+        <p className="mt-4">{s.desc}</p>
+        <div className="mt-5">
+          {saved ? (
+            <ButtonLink to="/tracker" variant="ghost">
+              Open my tracker
+            </ButtonLink>
+          ) : (
+            <Button onClick={() => save(s)}>Add to my tracker</Button>
+          )}
+        </div>
+      </Card>
 
-      <p className="mt-5">{s.desc}</p>
-
-      <section className="mt-8" aria-labelledby="el">
-        <h2 id="el" className="text-xl font-bold">
+      <section className="mt-10" aria-labelledby="el">
+        <h2 id="el" className="text-2xl font-extrabold">
           Do you qualify?
         </h2>
-        <p className="text-soft">
+        <p className="mb-3 text-muted">
           {m.known
             ? `You meet ${m.met} of ${m.known} criteria we could check.`
             : 'Fill in your profile to see how you match.'}
         </p>
-        <ul className="mt-3 space-y-2">
-          {m.checks.map(c => {
-            const [i, cls, t] = ICON[c.status]
-            return (
-              <li
-                key={c.label}
-                className="flex items-center gap-3 rounded-lg border border-line bg-white p-3"
-              >
-                <span
-                  aria-hidden
-                  className={`grid h-7 w-7 place-items-center rounded-full text-sm font-bold ${cls}`}
-                >
-                  {i}
-                </span>
-                <span className="flex-1">{c.label}</span>
-                <span className="text-sm text-soft">{t}</span>
-              </li>
-            )
-          })}
+        <ul className="space-y-3">
+          {m.checks.map((c) => (
+            <CheckRow
+              key={c.label}
+              check={c}
+              hint={
+                c.status === 'unmet'
+                  ? `How to fix: ${fixHint(s, c)}`
+                  : c.status === 'unknown'
+                    ? 'Add this to your profile to check it.'
+                    : undefined
+              }
+            />
+          ))}
         </ul>
+        {m.checks.some((c) => c.status === 'unknown') && (
+          <ButtonLink to="/profile" variant="ghost" size="sm" className="mt-3">
+            Update my profile
+          </ButtonLink>
+        )}
       </section>
 
-      <div className="mt-8 grid gap-6 sm:grid-cols-2">
+      <Card as="section" aria-labelledby="what" className="mt-10">
+        <Sticker tone="accent" rotate={2} className="mb-3">
+          Just exploring
+        </Sticker>
+        <h2 id="what" className="text-2xl font-extrabold">
+          What would change my score?
+        </h2>
+        <p className="mb-4 text-muted">
+          Try different numbers. Your saved profile stays exactly as it is.
+        </p>
+        {hasLevers ? (
+          <div className="grid gap-4 sm:grid-cols-2">
+            {s.maxIncome ? (
+              <Slider
+                label="Family income per year"
+                value={what.income ?? s.maxIncome}
+                min={0}
+                max={incMax}
+                step={10000}
+                onChange={(v) => setWhat((w) => ({ ...w, income: v }))}
+                display={what.income === null ? 'Not set' : money(what.income)}
+                hint={`Limit is ${money(s.maxIncome)}`}
+              />
+            ) : null}
+            {s.minPct ? (
+              <Slider
+                label="Last exam percentage"
+                value={what.pct ?? s.minPct}
+                min={0}
+                max={100}
+                step={1}
+                onChange={(v) => setWhat((w) => ({ ...w, pct: v }))}
+                display={what.pct === null ? 'Not set' : `${what.pct}%`}
+                hint={`Minimum is ${s.minPct}%`}
+              />
+            ) : null}
+          </div>
+        ) : (
+          <p>
+            This scholarship does not depend on income or marks, so there is
+            nothing to slide here.
+          </p>
+        )}
+        {hasLevers && (
+          <div
+            className="mt-4 flex flex-wrap items-center gap-4 border-t-2 border-dashed border-edge pt-4"
+            role="status"
+          >
+            <RatchetRing value={scenario.score} size={72} />
+            <div className="min-w-0 flex-1">
+              <p className="font-bold">
+                With these numbers: {scenario.score}% match
+                {dirty && delta !== 0
+                  ? ` (${delta > 0 ? '+' : ''}${delta} from now)`
+                  : ''}
+              </p>
+              {changed.length > 0 ? (
+                <ul className="mt-1 list-disc pl-5 text-sm">
+                  {changed.map((c) => (
+                    <li key={c.label}>
+                      {c.label}:{' '}
+                      {WORD[m.checks[scenario.checks.indexOf(c)].status]} to{' '}
+                      {WORD[c.status]}
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-sm text-muted">
+                  No checks change yet. Try moving a slider.
+                </p>
+              )}
+            </div>
+            {dirty && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() =>
+                  setWhat({ income: profile.income, pct: profile.pct })
+                }
+              >
+                Reset to my profile
+              </Button>
+            )}
+          </div>
+        )}
+      </Card>
+
+      <div className="mt-10 grid gap-8 sm:grid-cols-2">
         <section aria-labelledby="dc">
-          <h2 id="dc" className="text-xl font-bold">
+          <h2 id="dc" className="text-2xl font-extrabold">
             Documents to keep ready
           </h2>
-          <ul className="mt-2 list-disc space-y-1 pl-5">
-            {s.docs.map(d => (
-              <li key={d}>{d}</li>
+          <ul className="mt-3 space-y-2">
+            {s.docs.map((d) => (
+              <li
+                key={d}
+                className="rounded-xl border-2 border-edge bg-surface p-3 font-medium"
+              >
+                {d}
+              </li>
             ))}
           </ul>
         </section>
         <section aria-labelledby="sp">
-          <h2 id="sp" className="text-xl font-bold">
+          <h2 id="sp" className="text-2xl font-extrabold">
             How to apply
           </h2>
-          <ol className="mt-2 list-decimal space-y-1 pl-5">
-            {s.steps.map(d => (
-              <li key={d}>{d}</li>
+          <ol className="relative mt-3 ml-4 space-y-4 border-l-2 border-edge pl-8">
+            {s.steps.map((st, i) => (
+              <li key={st} className="relative">
+                <span
+                  aria-hidden="true"
+                  className="absolute -left-[3.15rem] top-0 grid h-9 w-9 place-items-center rounded-lg border-2 border-edge bg-accent font-head font-extrabold text-inverse-text"
+                >
+                  {i + 1}
+                </span>
+                <span className="block pt-1">{st}</span>
+              </li>
             ))}
           </ol>
         </section>
       </div>
-
-      <div className="mt-8">
-        {saved ? (
-          <Link
-            to="/tracker"
-            className="inline-flex items-center rounded-full bg-sun px-6 py-3 font-bold min-h-[44px]"
-          >
-            Saved. Open my tracker
-          </Link>
-        ) : (
-          <button
-            onClick={handleAdd}
-            className="rounded-full bg-ink px-6 py-3 font-bold text-white min-h-[44px]"
-          >
-            Add to my tracker
-          </button>
-        )}
-      </div>
-    </motion.article>
+    </article>
   )
 }

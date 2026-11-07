@@ -1,20 +1,240 @@
 @import '@fontsource-variable/bricolage-grotesque';
 @import '@fontsource/dm-sans/400.css';
 @import '@fontsource/dm-sans/500.css';
-@tailwind base;@tailwind components;@tailwind utilities;
-body{@apply bg-mist text-ink font-body antialiased}
-h1,h2,h3{@apply font-head tracking-tight}
-:focus-visible{outline:3px solid #0E7C66;outline-offset:2px}
-.field{@apply w-full rounded-lg border border-line bg-white px-3 py-2 text-sm min-h-[40px]}
-@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+@import '@fontsource/dm-sans/700.css';
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-/* Range input styling */
-input[type="range"]{@apply cursor-pointer appearance-none bg-transparent}
-input[type="range"]::-webkit-slider-track{@apply h-2 rounded-full bg-line}
-input[type="range"]::-webkit-slider-thumb{@apply appearance-none h-5 w-5 rounded-full bg-teal border-2 border-white shadow-sm}
-input[type="range"]::-moz-range-track{@apply h-2 rounded-full bg-line}
-input[type="range"]::-moz-range-thumb{@apply h-5 w-5 rounded-full bg-teal border-2 border-white shadow-sm}
+:root {
+  --ink: #0a0a0a;
+  --surface: #ffffff;
+  --paper: #f0f0f0;
+  --inverse: #0a0a0a;
+  --inverse-text: #ffffff;
+  --accent: #2b50ff;
+  --accent-text: #2b50ff;
+  --fg: #0a0a0a;
+  --edge: #0a0a0a;
+  --shadow: #0a0a0a;
+  --muted: #4a4a4a;
+  color-scheme: light;
+}
+.dark {
+  --ink: #ffffff;
+  --surface: #0a0a0a;
+  --paper: #171717;
+  --inverse: #ffffff;
+  --inverse-text: #0a0a0a;
+  --accent: #2b50ff;
+  --accent-text: #8fa2ff;
+  --fg: #ffffff;
+  --edge: #ffffff;
+  --shadow: #ffffff;
+  --muted: #d0d0d0;
+  color-scheme: dark;
+}
 
-/* Skeleton pulse */
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
-.animate-pulse{animation:pulse 2s cubic-bezier(0.4,0,0.6,1) infinite}
+@layer base {
+  html {
+    scroll-padding-top: 5rem;
+  }
+  body {
+    @apply bg-surface text-fg font-body antialiased;
+  }
+  h1,
+  h2,
+  h3 {
+    @apply font-head tracking-tight;
+  }
+  h1,
+  h2,
+  h3,
+  h4 {
+    text-wrap: balance;
+  }
+  :focus-visible {
+    outline: 3px solid var(--accent);
+    outline-offset: 2px;
+  }
+  .dark :focus-visible {
+    outline-color: #8fa2ff;
+  }
+  main:focus {
+    outline: none;
+  }
+  [tabindex='-1']:focus {
+    outline: none;
+  }
+}
+
+@layer components {
+  .sticker {
+    transform: rotate(var(--r, -2deg));
+    transition: transform 0.15s ease-out;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .sticker:hover,
+    a:hover > .sticker,
+    button:hover > .sticker {
+      transform: translateY(-2px) rotate(0deg);
+    }
+  }
+  .sticker:focus-visible,
+  .sticker:focus-within {
+    transform: translateY(-2px) rotate(0deg);
+  }
+  a:not(.no-sweep) {
+    text-decoration-thickness: 2px;
+    text-underline-offset: 3px;
+  }
+  a:not(.no-sweep):hover,
+  a:not(.no-sweep):focus-visible {
+    text-decoration-color: var(--accent);
+  }
+
+  /* Ticket tear: dashed perforated edge + notches */
+  .ticket {
+    border-style: dashed;
+    position: relative;
+  }
+  .ticket::before,
+  .ticket::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    width: 14px;
+    height: 14px;
+    margin-top: -7px;
+    border: 2px solid var(--edge);
+    border-radius: 9999px;
+    background: var(--surface);
+  }
+  .ticket::before {
+    left: -9px;
+    clip-path: inset(0 0 0 50%);
+  }
+  .ticket::after {
+    right: -9px;
+    clip-path: inset(0 50% 0 0);
+  }
+
+  .odometer {
+    font-variant-numeric: tabular-nums;
+  }
+  .hero-grid {
+    background-color: var(--surface);
+    background-image: linear-gradient(
+        90deg,
+        rgb(10 10 10 / 0.06) 1px,
+        transparent 1px
+      ),
+      linear-gradient(rgb(10 10 10 / 0.06) 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
+  [cmdk-dialog] {
+    position: fixed;
+    inset: 12% 1rem auto;
+    z-index: 80;
+    margin: auto;
+    max-width: 38rem;
+    overflow: hidden;
+    border: 2px solid var(--edge);
+    border-radius: 1rem;
+    background: var(--surface);
+    color: var(--fg);
+    box-shadow: 6px 6px 0 var(--shadow);
+  }
+  [cmdk-input] {
+    width: 100%;
+    min-height: 3.25rem;
+    border: 0;
+    border-bottom: 2px solid var(--edge);
+    background: transparent;
+    padding: 0.75rem 1rem;
+    color: inherit;
+    font: inherit;
+  }
+  [cmdk-list] {
+    max-height: 22rem;
+    overflow: auto;
+    padding: 0.5rem;
+  }
+  [cmdk-group-heading] {
+    padding: 0.6rem 0.75rem 0.25rem;
+    color: var(--muted);
+    font-size: 0.75rem;
+    font-weight: 700;
+  }
+  [cmdk-item] {
+    min-height: 2.75rem;
+    cursor: pointer;
+    border-radius: 0.75rem;
+    padding: 0.7rem 0.75rem;
+    font-weight: 700;
+  }
+  [cmdk-item][aria-selected='true'] {
+    background: var(--surface);
+    outline: 2px solid var(--edge);
+  }
+  [cmdk-overlay] {
+    position: fixed;
+    inset: 0;
+    z-index: 79;
+    background: rgb(10 10 10 / 0.72);
+  }
+}
+
+@media print {
+  header,
+  footer,
+  button,
+  a[href],
+  .no-print {
+    display: none !important;
+  }
+  body,
+  .dark {
+    background: white !important;
+    color: black !important;
+  }
+  main {
+    max-width: none !important;
+    padding: 0 !important;
+  }
+  article,
+  section,
+  div {
+    break-inside: avoid;
+    box-shadow: none !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition: none !important;
+    animation: none !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Forced colours: keep borders and focus rings visible */
+@media (forced-colors: active) {
+  .sticker,
+  .ticket {
+    forced-color-adjust: none;
+    border-color: CanvasText;
+  }
+  button,
+  a,
+  input,
+  select,
+  textarea {
+    border-color: ButtonText;
+  }
+  :focus-visible {
+    outline: 3px solid Highlight;
+  }
+}

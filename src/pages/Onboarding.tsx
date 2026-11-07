@@ -1,351 +1,102 @@
-import { useState, useEffect, useRef } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
-import { useApp } from '../store'
-import { type Profile, emptyProfile } from '../match'
-import { DATA } from '../data'
-import { match } from '../match'
-import { SelectField, InputField } from '../components/ui/Field'
-import { LV, FD, CT, ST } from '../components/ProfileForm'
-import { pageVariants, fadeIn } from '../lib/motion'
-import { cn } from '../lib/utils'
+import {useEffect, useRef, useState} from 'react'
+import {AnimatePresence, motion} from 'framer-motion'
+import {DATA} from '../data'
+import {match} from '../match'
+import {useApp} from '../store'
+import type {FieldKey} from '../lib/hints'
+import {stepSlide, useMotion} from '../lib/motion'
+import {ProfileForm} from '../components/ProfileForm'
+import {SegmentedMeter} from '../components/SegmentedMeter'
+import {Button, ButtonLink} from '../components/ui/Button'
+import {Card} from '../components/ui/Card'
 
-const STEP_LABELS = ['Study', 'You', 'Money and marks', 'Review'] as const
-type StepIndex = 0 | 1 | 2 | 3
-
-interface StepErrors {
-  [key: string]: string
-}
-
-function validateStep(step: StepIndex, draft: Profile): StepErrors {
-  const errors: StepErrors = {}
-  if (step === 0) {
-    if (!draft.level) errors.level = 'Choose your study level to continue.'
-  }
-  // Other steps are optional per task spec (Skip option)
-  return errors
-}
+type Step = {title: string; blurb: string; fields: FieldKey[]}
+const STEPS: Step[] = [
+  {title: 'Study', blurb: 'What are you studying, or planning to study?', fields: ['level', 'field']},
+  {title: 'You', blurb: 'Some scholarships are for specific groups. Share what you are comfortable with.', fields: ['cat', 'gender', 'state']},
+  {title: 'Money and marks', blurb: 'These two decide a lot of eligibility. Estimates are fine.', fields: ['income', 'pct']},
+  {title: 'Review', blurb: 'Here is what we will use to match you.', fields: []},
+]
+const LABELS: [string, FieldKey][] = [['Study level', 'level'], ['Field', 'field'], ['Category', 'cat'], ['Gender', 'gender'], ['State', 'state'], ['Family income', 'income'], ['Last exam percentage', 'pct']]
 
 export default function Onboarding() {
-  const { profile, setProfile } = useApp()
-  const navigate = useNavigate()
-  const prefersReduced = useReducedMotion()
+  const profile = useApp(s => s.profile)
+  const [step, setStep] = useState(0)
+  const [dir, setDir] = useState(1)
+  const [errors, setErrors] = useState<Partial<Record<FieldKey, string>>>({})
+  const heading = useRef<HTMLHeadingElement>(null)
+  const firstLevel = useRef<HTMLInputElement | null>(null)
+  const mounted = useRef(false)
+  const {reduce} = useMotion()
 
-  // Local draft so we can validate before saving
-  const [draft, setDraft] = useState<Profile>(() => ({
-    ...emptyProfile,
-    ...profile,
-  }))
-  const [step, setStep] = useState<StepIndex>(0)
-  const [errors, setErrors] = useState<StepErrors>({})
-  const [direction, setDirection] = useState(1) // 1 = forward, -1 = back
-  const headingRef = useRef<HTMLHeadingElement>(null)
-
-  // Focus heading on step change for screen readers
   useEffect(() => {
-    headingRef.current?.focus()
+    if (!mounted.current) { mounted.current = true; return }
+    heading.current?.focus()
   }, [step])
 
-  const update = (partial: Partial<Profile>) => {
-    setDraft(prev => ({ ...prev, ...partial }))
-    // Clear errors for changed fields
-    const keys = Object.keys(partial)
-    setErrors(prev => {
-      const next = { ...prev }
-      keys.forEach(k => delete next[k])
-      return next
-    })
-  }
-
-  const numChange = (k: 'income' | 'pct') => (e: React.ChangeEvent<HTMLInputElement>) =>
-    update({ [k]: e.target.value === '' ? null : Number(e.target.value) })
-
-  const goNext = () => {
-    const errs = validateStep(step, draft)
-    if (Object.keys(errs).length > 0) {
-      setErrors(errs)
-      return
+  const validate = (): boolean => {
+    const e: Partial<Record<FieldKey, string>> = {}
+    if (step === 0 && !profile.level) e.level = 'Choose your study level to continue.'
+    if (step === 2) {
+      if (profile.income !== null && profile.income < 0) e.income = 'Income cannot be negative.'
+      if (profile.pct !== null && (profile.pct < 0 || profile.pct > 100)) e.pct = 'Enter a percentage between 0 and 100.'
     }
-    setDirection(1)
-    if (step < 3) {
-      setStep((step + 1) as StepIndex)
-    }
+    setErrors(e)
+    if (e.level) firstLevel.current?.focus()
+    return Object.keys(e).length === 0
   }
+  const go = (to: number) => { setDir(to > step ? 1 : -1); setErrors({}); setStep(to) }
+  const next = () => { if (validate()) go(step + 1) }
 
-  const goBack = () => {
-    setDirection(-1)
-    if (step > 0) {
-      setStep((step - 1) as StepIndex)
-    }
-  }
-
-  const skip = () => {
-    setDirection(1)
-    if (step < 3) {
-      setStep((step + 1) as StepIndex)
-    }
-  }
-
-  const finish = () => {
-    setProfile(draft)
-    navigate('/discover')
-  }
-
-  // Save draft to store whenever it changes
-  useEffect(() => {
-    setProfile(draft)
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [draft])
-
-  // Count matching scholarships for review
-  const matchCount = DATA.filter(s => match(s, draft).score >= 70).length
-
-  // Progress
-  const progress = ((step + 1) / 4) * 100
-
-  const slideVariants = {
-    initial: (d: number) => ({ x: d > 0 ? 60 : -60, opacity: 0 }),
-    animate: { x: 0, opacity: 1, transition: { duration: 0.3, ease: 'easeOut' as const } },
-    exit: (d: number) => ({ x: d > 0 ? -60 : 60, opacity: 0, transition: { duration: 0.25 } }),
-  }
+  const matches = DATA.filter(s => { const m = match(s, profile); return m.known > 0 && m.score >= 70 }).length
+  const cur = STEPS[step]
+  const canSkip = step === 1 || step === 2
 
   return (
-    <motion.div
-      className="mx-auto max-w-xl"
-      variants={prefersReduced ? undefined : pageVariants}
-      initial="initial"
-      animate="animate"
-      exit="exit"
-    >
-      <h1 ref={headingRef} tabIndex={-1} className="text-3xl font-extrabold outline-none">
-        Build your profile
-      </h1>
-      <p className="mt-2 text-soft">
-        Takes about 2 minutes. We use this to match you with scholarships. You can skip any step and come back later.
-      </p>
-
-      {/* Progress bar */}
-      <div className="mt-6 mb-2" role="progressbar" aria-valuenow={step + 1} aria-valuemin={1} aria-valuemax={4} aria-label={`Step ${step + 1} of 4: ${STEP_LABELS[step]}`}>
-        <div className="flex justify-between text-sm mb-1">
-          {STEP_LABELS.map((label, i) => (
-            <span
-              key={label}
-              className={cn(
-                'font-medium',
-                i <= step ? 'text-teal' : 'text-soft'
-              )}
-            >
-              {label}
-            </span>
-          ))}
-        </div>
-        <div className="h-2 rounded-full bg-line overflow-hidden">
-          <motion.div
-            className="h-full rounded-full bg-teal"
-            initial={{ width: 0 }}
-            animate={{ width: `${progress}%` }}
-            transition={{ duration: prefersReduced ? 0 : 0.35, ease: 'easeOut' }}
-          />
-        </div>
+    <div className="mx-auto max-w-2xl">
+      <h1 className="sr-only">Build your profile</h1>
+      <div role="progressbar" aria-label="Profile setup progress" aria-valuemin={1} aria-valuemax={4} aria-valuenow={step + 1} aria-valuetext={`Step ${step + 1} of 4: ${cur.title}`} className="mb-6">
+        <p className="mb-2 text-sm font-bold" aria-hidden="true">Step {step + 1} of 4: {cur.title}</p>
+        <SegmentedMeter value={step + 1} max={4} segments={4} fillClass="bg-accent" />
       </div>
-
-      {/* Step content */}
-      <div className="mt-8 min-h-[280px]">
-        <AnimatePresence mode="wait" custom={direction}>
-          {step === 0 && (
-            <motion.div
-              key="step-0"
-              custom={direction}
-              variants={prefersReduced ? undefined : slideVariants}
-              initial="initial"
-              animate="animate"
-              exit="exit"
-              className="space-y-4"
-            >
-              <h2 className="text-xl font-bold">What are you studying?</h2>
-              <SelectField
-                id="ob-level"
-                label="Study level"
-                value={draft.level}
-                onChange={e => update({ level: e.target.value })}
-                options={LV}
-                error={errors.level}
-              />
-              <SelectField
-                id="ob-field"
-                label="Field of study"
-                value={draft.field}
-                onChange={e => update({ field: e.target.value })}
-                options={FD}
-              />
-            </motion.div>
-          )}
-
-          {step === 1 && (
-            <motion.div
-              key="step-1"
-              custom={direction}
-              variants={prefersReduced ? undefined : slideVariants}
-              initial="initial"
-              animate="animate"
-              exit="exit"
-              className="space-y-4"
-            >
-              <h2 className="text-xl font-bold">A little about you</h2>
-              <SelectField
-                id="ob-cat"
-                label="Category"
-                value={draft.cat}
-                onChange={e => update({ cat: e.target.value })}
-                options={CT}
-              />
+      <Card className="overflow-hidden">
+        <AnimatePresence mode="wait" custom={dir} initial={false}>
+          <motion.div key={step} custom={dir} variants={reduce ? undefined : stepSlide} initial="hidden" animate="show" exit="exit">
+            <h2 ref={heading} tabIndex={-1} className="text-3xl font-extrabold">{cur.title}</h2>
+            <p className="mb-6 mt-1 text-muted">{cur.blurb}</p>
+            {step < 3 ? (
+              <ProfileForm fields={cur.fields} errors={errors} levelRef={el => { firstLevel.current = el }} />
+            ) : (
               <div>
-                <label htmlFor="ob-gender" className="mb-1 block text-sm font-medium">
-                  Gender
-                </label>
-                <select
-                  id="ob-gender"
-                  className="field"
-                  value={draft.gender}
-                  onChange={e => update({ gender: e.target.value as Profile['gender'] })}
-                >
-                  <option value="">Prefer not to say</option>
-                  <option value="f">Female</option>
-                  <option value="m">Male</option>
-                </select>
-              </div>
-              <SelectField
-                id="ob-state"
-                label="State"
-                value={draft.state}
-                onChange={e => update({ state: e.target.value })}
-                options={ST}
-              />
-            </motion.div>
-          )}
-
-          {step === 2 && (
-            <motion.div
-              key="step-2"
-              custom={direction}
-              variants={prefersReduced ? undefined : slideVariants}
-              initial="initial"
-              animate="animate"
-              exit="exit"
-              className="space-y-4"
-            >
-              <h2 className="text-xl font-bold">Money and marks</h2>
-              <p className="text-sm text-soft">
-                These help us filter income-based and merit-based scholarships. Leave blank if you are not sure.
-              </p>
-              <InputField
-                id="ob-income"
-                label="Family income per year (₹)"
-                type="number"
-                min={0}
-                value={draft.income ?? ''}
-                onChange={numChange('income')}
-                placeholder="e.g. 400000"
-              />
-              <InputField
-                id="ob-pct"
-                label="Last exam percentage"
-                type="number"
-                min={0}
-                max={100}
-                value={draft.pct ?? ''}
-                onChange={numChange('pct')}
-                placeholder="e.g. 78"
-              />
-            </motion.div>
-          )}
-
-          {step === 3 && (
-            <motion.div
-              key="step-3"
-              custom={direction}
-              variants={prefersReduced ? undefined : fadeIn}
-              initial="initial"
-              animate="animate"
-              exit="exit"
-              className="space-y-4"
-            >
-              <h2 className="text-xl font-bold">You are all set</h2>
-
-              <div className="rounded-xl border border-line bg-white p-5">
-                <div className="grid gap-3 sm:grid-cols-2">
-                  <ReviewItem label="Study level" value={draft.level} />
-                  <ReviewItem label="Field" value={draft.field} />
-                  <ReviewItem label="Category" value={draft.cat} />
-                  <ReviewItem label="Gender" value={draft.gender === 'f' ? 'Female' : draft.gender === 'm' ? 'Male' : ''} />
-                  <ReviewItem label="State" value={draft.state} />
-                  <ReviewItem label="Family income" value={draft.income ? `₹${draft.income.toLocaleString('en-IN')}` : ''} />
-                  <ReviewItem label="Percentage" value={draft.pct ? `${draft.pct}%` : ''} />
-                </div>
-              </div>
-
-              <div className="rounded-xl bg-teal/10 p-5 text-center">
-                <p className="font-head text-3xl font-bold text-teal">{matchCount}</p>
-                <p className="text-sm font-medium text-teal">
-                  scholarship{matchCount === 1 ? '' : 's'} match your profile
+                <p className="mb-4 rounded-xl border-2 border-edge bg-accent p-4 font-head text-2xl font-extrabold text-inverse-text" role="status">
+                  {matches === 1 ? '1 scholarship matches you' : `${matches} scholarships match you`}
                 </p>
+                <dl className="divide-y-2 divide-edge rounded-xl border-2 border-edge">
+                  {LABELS.map(([label, key]) => {
+                    const v = profile[key]
+                    const shown = key === 'gender' ? (v === 'f' ? 'Female' : v === 'm' ? 'Male' : 'Not shared') : v === '' || v === null ? 'Not added' : key === 'pct' ? `${v}%` : key === 'income' ? `₹${Number(v).toLocaleString('en-IN')}` : String(v)
+                    return (
+                      <div key={key} className="flex items-center justify-between gap-3 p-3">
+                        <dt className="text-sm text-muted">{label}</dt>
+                        <dd className="font-bold">{shown}</dd>
+                      </div>
+                    )
+                  })}
+                </dl>
+                <p className="mt-3 text-sm text-muted">A match means you meet 70% or more of the criteria we could check. You can edit your profile any time.</p>
               </div>
-            </motion.div>
-          )}
+            )}
+          </motion.div>
         </AnimatePresence>
-      </div>
-
-      {/* Navigation buttons */}
-      <div className="mt-8 flex items-center gap-3">
-        {step > 0 && (
-          <button
-            onClick={goBack}
-            className="rounded-full border border-line px-5 py-2.5 text-sm font-medium hover:bg-white min-h-[44px]"
-          >
-            Back
-          </button>
-        )}
-        <div className="flex-1" />
-        {step < 3 && step > 0 && (
-          <button
-            onClick={skip}
-            className="rounded-full px-4 py-2.5 text-sm font-medium text-soft hover:text-ink min-h-[44px]"
-          >
-            Skip
-          </button>
-        )}
-        {step < 3 ? (
-          <button
-            onClick={goNext}
-            className="rounded-full bg-teal px-6 py-2.5 text-sm font-bold text-white hover:bg-teal/90 min-h-[44px]"
-          >
-            Next
-          </button>
-        ) : (
-          <button
-            onClick={finish}
-            className="rounded-full bg-teal px-6 py-2.5 text-sm font-bold text-white hover:bg-teal/90 min-h-[44px]"
-          >
-            See my scholarships
-          </button>
-        )}
-      </div>
-
-      <p className="mt-4 text-center text-sm text-soft">
-        Already have a profile?{' '}
-        <Link to="/discover" className="underline text-teal">
-          Skip to discover
-        </Link>
-      </p>
-    </motion.div>
-  )
-}
-
-function ReviewItem({ label, value }: { label: string; value: string }) {
-  return (
-    <div>
-      <p className="text-sm text-soft">{label}</p>
-      <p className="font-medium">{value || <span className="text-soft italic">Not set</span>}</p>
+        <div className="mt-8 flex flex-wrap items-center gap-3">
+          {step > 0 && <Button variant="ghost" onClick={() => go(step - 1)}>Back</Button>}
+          {canSkip && <Button variant="ghost" onClick={() => go(step + 1)}>Skip this step</Button>}
+          <div className="ml-auto flex gap-3">
+            {step === 3 && <Button variant="ghost" onClick={() => go(0)}>Edit answers</Button>}
+            {step < 3 ? <Button onClick={next}>{step === 2 ? 'Review my profile' : 'Continue'}</Button> : <ButtonLink to="/discover">See my matches</ButtonLink>}
+          </div>
+        </div>
+      </Card>
     </div>
   )
 }

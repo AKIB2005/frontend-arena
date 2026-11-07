@@ -1,104 +1,73 @@
-# NOTES — Grantly Hackathon Build
+# Notes
 
-## What is done
+## Done
+Everything in the brief's priority list, steps 1 to 11, including the bottom-of-list items (dark mode, shortcuts, compare, drawer).
 
-### Task 1: Refactor ✅
-- Split monolithic `App.tsx` into `src/components/` (Layout, Ring, Due, Card, ProfileForm, ui/Button, ui/Badge, ui/Field) and `src/pages/` (Home, Discover, Detail, Tracker, Onboarding, Profile).
-- App.tsx is now routing only.
-- Added `src/lib/utils.ts` with `cn()` using clsx + tailwind-merge.
-- Behaviour preserved — all existing functionality works identically.
-
-### Task 2: Framer Motion setup ✅
-- Installed framer-motion. Created `src/lib/motion.ts` with shared variants (page, card, fade, slide, scale, stagger container) and `useReducedMotion`-aware helpers.
-- All durations under 400ms. Motion fully disabled when `prefers-reduced-motion` is set.
-
-### Task 3: Landing hero ✅
-- New Home page at `/` with headline, sub-line, and live interactive demo.
-- Demo shows a real scholarship card whose Ring animates from 0 to its score.
-- Eligibility checklist items stagger in one by one.
-- 2 sliders (income, percentage) + 1 toggle (woman applicant) change the score in real time.
-- CTA "Build my profile" → `/onboarding`; secondary "Browse scholarships" → `/discover`.
-- Quick stats section showing scholarship count, total funding, and "2 min" profile time.
-
-### Task 4: Journey stepper ✅
-- 4-step stepper in navbar: Profile → Discover → Apply → Track.
-- Highlights current stage based on route + profile completeness.
-- `aria-current="step"` on the active step. Keyboard accessible (all steps are links).
-- Mobile: collapses to numbered dots with a compact track link.
-
-### Task 5: Onboarding wizard ✅
-- 4-step wizard at `/onboarding`: Study, You, Money & marks, Review.
-- Animated progress bar tracks completion.
-- Back/Next navigation with slide animation between steps.
-- Validation on step 0 (study level required). Inline accessible error messages (`aria-invalid`, `aria-describedby`, `role="alert"`).
-- Skip option on steps 1 and 2.
-- Review step shows profile summary + "N scholarships match you" (score ≥ 70).
-- Saves to existing Zustand store. Profile editing available at `/profile`.
-
-### Task 6: Motion polish ✅
-- Ring fill animation (framer-motion `strokeDashoffset` from `c` to target).
-- Staggered card entrance on Discover (first render only, not on filter changes).
-- AnimatePresence page transitions (fade + slide).
-- Framer `layout` animation when tracker cards change column.
-- Animated count-up for "Potential funding" on Tracker (ease-out quad, respects reduced motion).
-- Toast notification "Saved to your tracker" with `role="status"` and `aria-live="polite"`.
-- Skeleton loaders (4 cards) on first Discover render (400ms delay).
-
-### Task 7: Quick-view drawer ✅
-- Accessible dialog with `aria-modal="true"`, `aria-labelledby`.
-- Focus trap: Tab cycles within drawer, Shift+Tab wraps.
-- Escape to close, returns focus to trigger element.
-- Compare: select up to 2 additional scholarships (3 total) to view side-by-side.
-- Built entirely without external libraries.
-
-### Task 8: Content ✅
-- Added 10 new scholarships (IDs 15–24) to `src/data.ts`.
-- Varied levels (Class 10-12, UG, PG, PhD), fields, categories, states.
-- Deadlines spread: 18, 30, 40, 45, 55, 65, 75, 90, 100, 110 days out.
-- Same `Sch` type, same factory function.
-
-### Task 9: Accessibility and responsive audit ✅
-Fixes applied:
-- **Skip-to-content link**: Added to Layout, visible on focus.
-- **Focus rings**: `:focus-visible` with 3px solid teal outline on all interactive elements.
-- **Tap targets**: All buttons and interactive elements have `min-h-[40px]` or `min-h-[44px]`.
-- **Headings in order**: h1 on every page, h2 for sections, h3 for card titles.
-- **ARIA labels**: Icon-only close button on drawer has `aria-label="Close quick view"`. Save buttons have contextual labels. Journey steps have `aria-label`.
-- **Labels on every input**: All form inputs have visible or `sr-only` labels. Search and filter inputs have `sr-only` labels.
-- **Contrast**: Replaced any `text-soft` on white backgrounds where contrast was low with higher-contrast pairings. `soft` (#4F6468) on `white` passes AA at 4.86:1 for normal text. `white` on `sun` (#FFC233) — buttons using sun bg use `text-ink` (#0F2A2E) instead of white.
-- **No horizontal scroll**: Tested layout at 375px, 768px, 1280px. Used `max-w-full`, `truncate`, `flex-wrap`, responsive grid breakpoints.
-- **Keyboard**: All interactions usable via keyboard. Drawer has full focus trap. Tab order follows visual order. Stepper dots are links.
-- **ARIA on drawer**: `role="dialog"`, `aria-modal="true"`, `aria-labelledby="drawer-title"`.
-- **Progress bar**: `role="progressbar"` with `aria-valuenow`, `aria-valuemin`, `aria-valuemax`, `aria-label` on onboarding.
-- **Reduced motion**: Global CSS rule + framer-motion `useReducedMotion()` checks; all animations resolve to instant when preferred.
-
-### Task 10: Finish ✅
-- `npm run build` passes with zero errors.
-- README.md updated with problem, approach, features, stack, run instructions, project structure, assumptions.
-- NOTES.md (this file) written.
-
-## What is rough
-
-- The "Apply" step in the journey stepper is a placeholder — it links to Discover since there is no real application flow.
-- Compare view in the drawer shows a limited selection of scholarships (first 8 excluding the current one) rather than a full searchable list.
-- Toast animation is simple fade-in/fade-out; no slide or stack management for multiple simultaneous toasts.
-- Skeleton loader uses a fixed 400ms delay rather than detecting actual data loading (data is synchronous).
-- Mobile stepper dots don't show labels on hover/long-press.
+## Verified
+- `npm run build` passes (tsc strict, no `any`).
+- Headless Chromium at 375, 768 and 1280px: no console errors, no horizontal scroll on any route.
+- axe-core (wcag2a, wcag2aa, wcag21aa, best-practice): 0 violations on all pages, in light and dark, at 375 and 1280px, including the drawer, help dialog, compare view and a populated tracker.
+- Scripted flow: onboarding validation, `/` focus, save toast, drawer focus return on Escape, `g` then `t`, confetti burst, Remove then Undo.
+- Not tested: a real screen reader, Safari/Firefox, or `forced-colors` mode on a real device.
 
 ## Assumptions
+1. `match.ts` is untouched. `store.ts` gained one action, `restore`, so Remove can be undone.
+2. Dependencies: framer-motion pinned to ^11.18 and tailwind-merge to ^2.6 (v3 of tailwind-merge targets Tailwind v4).
+3. Profile completeness counts 7 fields (level, field, category, state, gender, income, percentage). "Prefer not to say" for gender counts as not added.
+4. "In progress" on the tracker means applying or submitted.
+5. Hints on the Profile page count scholarships whose check is "unknown" because of that one field.
+6. The Apply step links to the soonest-deadline saved scholarship, or to Discover if nothing is saved.
+7. Calendar export includes saved and applying scholarships (not submitted or result), with a reminder 3 days before.
+8. Home is at `/` and the scholarship list moved to `/discover`.
+9. Stamp text is typed in capitals ("SAVED", "SUBMITTED") as the brief specifies; it is the only all-caps text.
+10. Stepped ring uses a small tick hook rather than a CSS `steps()` easing, so the number and the ring stay exactly in sync.
+11. Theme preference is stored under `grantly-theme`, with an inline script in `index.html` to avoid a flash.
 
-1. "Profile completeness" for the stepper is determined by whether any of `level`, `field`, or `cat` is set.
-2. "Strong match" threshold is 70% (consistent with existing codebase).
-3. The onboarding wizard only requires Study Level (step 0) — all other fields are optional and skippable.
-4. The interactive demo on the landing page uses the first scholarship in the data array as the example.
-5. Currency is Indian Rupees (₹) with en-IN formatting (matching existing code).
-6. The `name` field on the Profile type exists in the store but is not collected in the onboarding wizard (no scholarship uses it for matching).
-7. `src/match.ts` and `src/store.ts` logic is preserved exactly — no changes to scoring or state management.
-8. Deadlines are relative (days from now) so the app always shows realistic upcoming dates.
-9. `vercel.json` SPA rewrite is preserved unchanged.
-10. No backend or API calls — all data is bundled in `src/data.ts`.
+## Rough edges
+- Kanban moves are button-based only; drag and drop was optional and is not built.
+- Compare is selected from Discover; there is no picker on the Compare page itself.
+- Confetti and stamps are checked by scripted tests, not by eye on a phone.
+- Shortcut `g` then `t` waits 1.2 seconds for the second key.
 
-## Known bugs
+## Pass 2
 
-- None found during testing. If the user clears localStorage, the persisted profile and tracker are reset (expected Zustand persist behaviour).
-- AnimatePresence page transitions may flash briefly on fast navigation due to the `mode="wait"` exit/enter cycle. This is cosmetic only.
+### Done
+
+- Added lazy-loaded route chunks with a friendly error boundary and loading state.
+- Added Ctrl/Cmd+K command palette actions, including demo profile loading.
+- Added deferred Discover search, transition-wrapped filters, memoised match results, list layout animation, scroll progress, metadata, and print CSS.
+- Added Vitest coverage for unknown criteria, inclusive boundaries, women-only eligibility, and state mismatch.
+- Added ESLint and Prettier configuration plus `npm run lint`, `npm test`, and `npm run format:check`.
+
+### Known gaps
+
+- The existing tracker remains button-first; dnd-kit is installed but not wired into the kanban yet.
+- The existing custom dialog remains in use for quick view/help; Radix packages are available for the next focused refactor.
+- Guided first-run tour and full Lighthouse automation still need a browser-run pass.
+
+### Pass 3 contrast table
+
+| Pair | Light | Dark | Intended use |
+|---|---:|---:|---|
+| Ink on surface | 19.8:1 | 21:1 | Body text, borders, shadows |
+| Muted on surface | 8.9:1 | 13.6:1 | Supporting text |
+| Inverse text on accent | 5.9:1 | 5.9:1 | Primary actions and strong-match badges |
+| Accent text on surface | 5.9:1 | 7.1:1 | Signal labels and focus |
+
+### Pass 3 device checklist
+
+- 375px and 768px layouts: checked through responsive CSS and touch-sized controls.
+- 200% zoom: semantic grid layouts remain single-column where needed; no intentional fixed-width panels.
+- iPhone Safari and mid-range Android Chrome: not available in this environment; browser smoke test and production build pass locally.
+
+## Pass 4 interaction map
+
+- Scholarship cards lift and reveal criteria dots on fine-pointer hover, card focus, and touch-sized layouts; reduced motion keeps the strip static.
+- Match rings expose a Radix tooltip on hover and keyboard focus; the accessible label remains available without motion.
+- Deadline badges expose the exact date on hover/focus; the plain deadline remains available to screen readers.
+- Buttons and demo CTA use transform-only press/lift states; touch uses `:active`, focus uses `:focus-visible`, and reduced motion removes movement.
+- Criteria rows slide an accent rail on hover/focus; unmet guidance remains in the row content and is never hover-only.
+- Discover filters stay sticky, announce result and strong-match counts, and expose Clear all as a normal keyboard/touch button.
+- Tracker cards reveal the drag affordance on hover/focus; document checkboxes draw a transform-only completion line and remain native controls.
+- Stepper links keep their labels visible on larger screens, use persistent active styling, and retain keyboard focus rings.
+- Radix command palette and tooltip surfaces are keyboard accessible and close through their native Escape behavior.

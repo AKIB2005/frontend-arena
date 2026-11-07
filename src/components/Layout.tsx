@@ -1,169 +1,254 @@
-import { Link, NavLink, useLocation } from 'react-router-dom'
-import { useApp } from '../store'
-import { cn } from '../lib/utils'
-import { ToastContainer } from './Toast'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { AnimatePresence, motion } from 'framer-motion'
+import { useUI } from '../lib/ui-store'
+import { WIPE, useMotion } from '../lib/motion'
+import { Confetti } from './Confetti'
+import { HelpDialog } from './HelpDialog'
+import { Stepper } from './Stepper'
+import { Toaster } from './Toaster'
+import { CommandPalette } from './CommandPalette'
+import * as TooltipPrimitive from '@radix-ui/react-tooltip'
 
-const STEPS = [
-  { label: 'Profile', path: '/onboarding', match: ['/onboarding', '/profile'] },
-  { label: 'Discover', path: '/discover', match: ['/discover', '/s/'] },
-  { label: 'Apply', path: '/discover', match: [] },
-  { label: 'Track', path: '/tracker', match: ['/tracker'] },
-] as const
-
-function getActiveStep(pathname: string, hasProfile: boolean): number {
-  if (pathname === '/tracker') return 3
-  if (pathname.startsWith('/s/')) return 1
-  if (pathname === '/discover') return 1
-  if (pathname === '/profile') return 0
-  if (pathname === '/onboarding') return 0
-  if (hasProfile) return 1
-  return 0
+function useShortcuts() {
+  const navigate = useNavigate()
+  const setHelp = useUI((s) => s.setHelp)
+  useEffect(() => {
+    let g = 0
+    const onKey = (e: KeyboardEvent) => {
+      if (e.metaKey || e.ctrlKey || e.altKey) return
+      const t = e.target
+      if (
+        t instanceof HTMLElement &&
+        t.closest('input,textarea,select,[contenteditable="true"]')
+      )
+        return
+      if (e.key === '?') {
+        e.preventDefault()
+        setHelp(true)
+        return
+      }
+      if (document.querySelector('[role="dialog"]')) return
+      if (e.key === '/') {
+        e.preventDefault()
+        const el = document.getElementById('search')
+        if (el) el.focus()
+        else {
+          navigate('/discover')
+          window.setTimeout(
+            () => document.getElementById('search')?.focus(),
+            150,
+          )
+        }
+      } else if (e.key === 'g') g = Date.now()
+      else if (Date.now() - g < 1200 && e.key === 't') {
+        g = 0
+        navigate('/tracker')
+      } else if (Date.now() - g < 1200 && e.key === 'd') {
+        g = 0
+        navigate('/discover')
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [navigate, setHelp])
 }
 
-export function Layout({ children }: { children: React.ReactNode }) {
-  const n = useApp(s => s.apps.length)
-  const profile = useApp(s => s.profile)
-  const hasProfile = !!(profile.level || profile.field || profile.cat)
-  const location = useLocation()
-  const activeStep = getActiveStep(location.pathname, hasProfile)
-  const isHome = location.pathname === '/'
+const Icon = ({ dark }: { dark: boolean }) =>
+  dark ? (
+    <svg
+      aria-hidden="true"
+      width="20"
+      height="20"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.5"
+    >
+      <circle cx="12" cy="12" r="4" fill="currentColor" />
+      <path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2" />
+    </svg>
+  ) : (
+    <svg
+      aria-hidden="true"
+      width="20"
+      height="20"
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      stroke="currentColor"
+      strokeWidth="2"
+    >
+      <path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z" />
+    </svg>
+  )
+
+export function Layout({ children }: { children: ReactNode }) {
+  const { pathname } = useLocation()
+  const {
+    theme,
+    toggleTheme,
+    setHelp,
+    reduceMotion,
+    toggleReduceMotion,
+    setCommandOpen,
+  } = useUI()
+  const { reduce } = useMotion()
+  const main = useRef<HTMLElement>(null)
+  const first = useRef(true)
+  const [wipe, setWipe] = useState(0)
+  const [scrolled, setScrolled] = useState(false)
+  useShortcuts()
+
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', theme === 'dark')
+    document.title =
+      pathname === '/'
+        ? 'Grantly: find scholarships you can actually win'
+        : pathname === '/dashboard'
+          ? 'Dashboard | Grantly'
+          : pathname === '/discover'
+            ? 'Discover scholarships | Grantly'
+            : pathname === '/tracker'
+              ? 'My tracker | Grantly'
+              : 'Grantly'
+  }, [pathname, theme])
+
+  useEffect(() => {
+    if (first.current) {
+      first.current = false
+      return
+    }
+    window.scrollTo(0, 0)
+    main.current?.focus({ preventScroll: true })
+    if (!reduce) setWipe((w) => w + 1)
+  }, [pathname, reduce])
+
+  useEffect(() => {
+    const onScroll = () => {
+      setScrolled(window.scrollY > 8)
+      const max = document.documentElement.scrollHeight - window.innerHeight
+      const progress = max > 0 ? Math.min(1, window.scrollY / max) : 0
+      const bar = document.getElementById('scroll-progress')
+      if (bar) bar.style.transform = `scaleX(${progress})`
+    }
+    onScroll()
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="flex min-h-screen flex-col">
       <a
-        href="#main-content"
-        className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[100] focus:rounded-lg focus:bg-ink focus:px-4 focus:py-2 focus:text-white"
+        href="#main"
+        onClick={(e) => {
+          e.preventDefault()
+          main.current?.focus()
+        }}
+        className="sr-only z-[80] rounded-xl border-2 border-edge bg-accent px-4 py-2 font-bold text-inverse-text focus:not-sr-only focus:fixed focus:left-3 focus:top-3"
       >
         Skip to content
       </a>
-
-      <header className="border-b border-line bg-white sticky top-0 z-30">
-        <nav aria-label="Main" className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
-          <Link to="/" className="font-head text-2xl font-extrabold">
-            Grantly<span className="text-teal">.</span>
-          </Link>
-
-          {/* Desktop nav with journey stepper */}
-          <div className="hidden md:flex items-center gap-1">
-            {!isHome && (
-              <ol className="flex items-center gap-0 mr-4" aria-label="Journey steps">
-                {STEPS.map((step, i) => {
-                  const isCurrent = i === activeStep
-                  const isCompleted = i < activeStep
-                  return (
-                    <li key={step.label} className="flex items-center">
-                      {i > 0 && (
-                        <div
-                          className={cn(
-                            'h-px w-6 mx-1',
-                            isCompleted ? 'bg-teal' : 'bg-line'
-                          )}
-                          aria-hidden
-                        />
-                      )}
-                      <NavLink
-                        to={step.path}
-                        aria-current={isCurrent ? 'step' : undefined}
-                        className={cn(
-                          'flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium transition-colors',
-                          isCurrent && 'bg-teal/10 text-teal',
-                          isCompleted && 'text-teal',
-                          !isCurrent && !isCompleted && 'text-soft hover:text-ink'
-                        )}
-                      >
-                        <span
-                          className={cn(
-                            'grid h-5 w-5 place-items-center rounded-full text-xs font-bold',
-                            isCurrent && 'bg-teal text-white',
-                            isCompleted && 'bg-teal text-white',
-                            !isCurrent && !isCompleted && 'bg-line text-soft'
-                          )}
-                          aria-hidden
-                        >
-                          {isCompleted ? '✓' : i + 1}
-                        </span>
-                        {step.label}
-                      </NavLink>
-                    </li>
-                  )
-                })}
-              </ol>
-            )}
-
-            <NavLink
-              to="/discover"
-              end
-              className={({ isActive }) =>
-                cn('rounded-full px-4 py-2 text-sm font-medium min-h-[40px] inline-flex items-center', isActive ? 'bg-ink text-white' : 'hover:bg-mist')
-              }
+      <div
+        aria-hidden="true"
+        className="fixed inset-x-0 top-0 z-[75] h-1 origin-left scale-x-0 bg-accent"
+        id="scroll-progress"
+      />
+      <header
+        className={
+          scrolled
+            ? 'border-b-2 border-edge bg-surface shadow-hard-sm'
+            : 'border-b-2 border-transparent bg-surface'
+        }
+      >
+        <div className="mx-auto max-w-6xl px-4 py-3">
+          <div className="mb-3 flex items-center justify-between gap-3">
+            <Link
+              to="/"
+              className="inline-flex min-h-[44px] items-center font-head text-3xl font-extrabold"
             >
-              Discover
-            </NavLink>
-            <NavLink
-              to="/tracker"
-              className={({ isActive }) =>
-                cn('rounded-full px-4 py-2 text-sm font-medium min-h-[40px] inline-flex items-center', isActive ? 'bg-ink text-white' : 'hover:bg-mist')
-              }
-            >
-              My tracker
-              {n > 0 && (
-                <span className="ml-2 rounded-full bg-sun px-2 text-xs text-ink">{n}</span>
-              )}
-            </NavLink>
+              Grantly<span className="text-accent">.</span>
+            </Link>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => setCommandOpen(true)}
+                aria-label="Open command palette"
+                className="grid h-11 w-11 place-items-center rounded-xl border-2 border-edge bg-surface font-bold shadow-hard-sm"
+              >
+                ⌘
+              </button>
+              <button
+                type="button"
+                onClick={() => setHelp(true)}
+                aria-label="Keyboard shortcuts"
+                className="grid h-11 w-11 place-items-center rounded-xl border-2 border-edge bg-surface font-bold shadow-hard-sm active:translate-x-0.5 active:translate-y-0.5 active:shadow-none"
+              >
+                <span aria-hidden="true">?</span>
+              </button>
+              <button
+                type="button"
+                onClick={toggleTheme}
+                aria-pressed={theme === 'dark'}
+                aria-label="Dark mode"
+                className="grid h-11 w-11 place-items-center rounded-xl border-2 border-edge bg-surface shadow-hard-sm active:translate-x-0.5 active:translate-y-0.5 active:shadow-none"
+              >
+                <Icon dark={theme === 'dark'} />
+              </button>
+              <button
+                type="button"
+                onClick={toggleReduceMotion}
+                aria-pressed={reduceMotion}
+                aria-label="Reduce motion"
+                className="hidden min-h-[44px] rounded-xl border-2 border-edge bg-surface px-3 text-sm font-bold shadow-hard-sm sm:block"
+              >
+                {reduceMotion ? 'Still' : 'Motion'}
+              </button>
+            </div>
           </div>
-
-          {/* Mobile nav */}
-          <div className="flex md:hidden items-center gap-1">
-            {!isHome && (
-              <div className="flex items-center gap-0.5 mr-2" aria-label="Journey steps" role="list">
-                {STEPS.map((step, i) => {
-                  const isCurrent = i === activeStep
-                  const isCompleted = i < activeStep
-                  return (
-                    <NavLink
-                      key={step.label}
-                      to={step.path}
-                      role="listitem"
-                      aria-current={isCurrent ? 'step' : undefined}
-                      aria-label={step.label}
-                      className={cn(
-                        'grid h-7 w-7 place-items-center rounded-full text-xs font-bold',
-                        isCurrent && 'bg-teal text-white',
-                        isCompleted && 'bg-teal/20 text-teal',
-                        !isCurrent && !isCompleted && 'bg-line text-soft'
-                      )}
-                    >
-                      {isCompleted ? '✓' : i + 1}
-                    </NavLink>
-                  )
-                })}
-              </div>
-            )}
-            <NavLink
-              to="/tracker"
-              className={({ isActive }) =>
-                cn('rounded-full px-3 py-2 text-sm font-medium min-h-[40px] inline-flex items-center', isActive ? 'bg-ink text-white' : 'hover:bg-mist')
-              }
-              aria-label={`My tracker${n > 0 ? `, ${n} items` : ''}`}
-            >
-              Track
-              {n > 0 && (
-                <span className="ml-1.5 rounded-full bg-sun px-1.5 text-xs text-ink">{n}</span>
-              )}
-            </NavLink>
-          </div>
-        </nav>
+          <Stepper />
+        </div>
       </header>
-
-      <main id="main-content" className="mx-auto w-full max-w-6xl flex-1 px-4 py-8">
-        {children}
+      <TooltipPrimitive.Provider delayDuration={120}>
+      <main
+        id="main"
+        ref={main}
+        tabIndex={-1}
+        className="mx-auto w-full max-w-6xl flex-1 px-4 py-8"
+      >
+        <motion.div
+          key={pathname}
+          initial={reduce ? false : { opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.15, duration: 0.01 }}
+        >
+          {children}
+        </motion.div>
       </main>
-
-      <footer className="border-t border-line py-6 text-center text-sm text-soft">
+      <footer className="border-t-2 border-edge bg-surface py-6 text-center text-sm text-muted">
         Sample data: all scholarships are fictional and for demonstration.
       </footer>
-
-      <ToastContainer />
+      <AnimatePresence>
+        {wipe > 0 && !reduce && (
+          <motion.div
+            key={wipe}
+            aria-hidden="true"
+            className="pointer-events-none fixed inset-0 z-[55] border-x-2 border-ink bg-accent"
+            initial={{ x: '-100%' }}
+            animate={{ x: WIPE.x }}
+            transition={{
+              duration: WIPE.duration,
+              times: WIPE.times,
+              ease: 'linear',
+            }}
+            onAnimationComplete={() => setWipe(0)}
+          />
+        )}
+      </AnimatePresence>
+      <Toaster />
+      <Confetti />
+      <HelpDialog />
+      <CommandPalette />
+      </TooltipPrimitive.Provider>
     </div>
   )
 }
