@@ -42,7 +42,7 @@ export function CompareBar() {
             to="/compare"
             variant="ink"
             size="sm"
-            className="!border-ink !bg-ink !text-inverse-text"
+            className="!border-ink !bg-fill-ink !text-on-ink"
           >
             Compare {compare.length} scholarships
           </ButtonLink>

@@ -63,7 +63,7 @@ export function RatchetRing({
         y="50%"
         dy=".35em"
         textAnchor="middle"
-        className="fill-fg font-head font-extrabold"
+        className="fill-ink font-head font-extrabold"
         fontSize={shown >= 100 ? size / 4.6 : size / 3.4}
         aria-hidden="true"
       >

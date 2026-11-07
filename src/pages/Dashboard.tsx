@@ -63,7 +63,7 @@ export default function Dashboard() {
         <Card
           as="section"
           aria-labelledby="today"
-          className="lg:col-span-7 bg-ink text-inverse-text"
+          className="lg:col-span-7 bg-fill-ink text-on-ink"
         >
           <h2 id="today" className="text-2xl font-extrabold">
             Today

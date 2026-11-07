@@ -232,7 +232,7 @@ export default function Home() {
                       transition={reduce ? { duration: 0 } : SPRING.soft}
                       className="pop-in relative flex items-center gap-3 rounded-xl border-2 border-edge bg-surface p-3 shadow-hard-sm"
                     >
-                      <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg border-2 border-edge bg-ink font-head font-extrabold text-inverse-text">
+                      <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg border-2 border-edge bg-fill-ink font-head font-extrabold text-on-ink">
                         #{index + 1}
                       </span>
                       <RatchetRing value={m.score} size={58} />

@@ -14,7 +14,7 @@ export function Tooltip({
       <TooltipPrimitive.Portal>
         <TooltipPrimitive.Content
           sideOffset={6}
-          className="z-[90] max-w-xs rounded-lg border-2 border-edge bg-ink px-3 py-2 text-sm font-bold text-inverse-text shadow-hard-sm"
+          className="z-[90] max-w-xs rounded-lg border-2 border-edge bg-fill-ink px-3 py-2 text-sm font-bold text-on-ink shadow-hard-sm"
         >
           {label}
           <TooltipPrimitive.Arrow className="fill-ink" />

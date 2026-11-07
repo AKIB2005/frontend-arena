@@ -32,7 +32,7 @@ export function ScholarshipCard({ s, score, checks, onQuickView }: Props) {
       tabIndex={0}
       data-testid="scholarship-card"
       className={cn(
-        'group/card relative flex h-full flex-col gap-4 bg-paper transition-[transform,opacity] duration-200 can-hover:hover:-translate-x-0.5 can-hover:hover:-translate-y-0.5 focus-within:-translate-x-0.5 focus-within:-translate-y-0.5',
+        'group/card relative isolate flex h-full flex-col gap-4 bg-surface text-ink transition-[transform,opacity] duration-200 can-hover:hover:-translate-x-0.5 can-hover:hover:-translate-y-0.5 focus-within:-translate-x-0.5 focus-within:-translate-y-0.5',
         isUrgent(s.deadline) && 'ticket',
       )}
     >
@@ -45,7 +45,7 @@ export function ScholarshipCard({ s, score, checks, onQuickView }: Props) {
         <Tooltip
           label={`Why this match? ${checks.filter((c) => c.status === 'met').length} met, ${checks.filter((c) => c.status === 'unmet').length} not met, ${checks.filter((c) => c.status === 'unknown').length} to check.`}
         >
-          <span className="inline-flex">
+          <span className="inline-flex text-ink">
             <RatchetRing value={score} />
           </span>
         </Tooltip>
@@ -53,7 +53,7 @@ export function ScholarshipCard({ s, score, checks, onQuickView }: Props) {
           <h3
             data-testid="scholarship-title"
             title={s.name}
-            className="line-clamp-2 text-lg font-extrabold leading-snug"
+            className="line-clamp-2 text-lg font-extrabold leading-snug text-ink"
           >
             <Link
               to={`/s/${s.id}`}
@@ -68,7 +68,7 @@ export function ScholarshipCard({ s, score, checks, onQuickView }: Props) {
           <p className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1">
             <span
               data-testid="scholarship-amount"
-              className="font-head text-xl font-extrabold"
+              className="font-head text-xl font-extrabold text-ink"
             >
               {money(s.amount)}
             </span>

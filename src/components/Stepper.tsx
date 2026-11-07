@@ -60,7 +60,7 @@ export function Stepper() {
                     done
                       ? 'bg-accent text-on-accent'
                       : current
-                        ? 'bg-ink text-inverse-text'
+                        ? 'bg-fill-ink text-on-ink'
                         : 'bg-surface',
                   )}
                 >
