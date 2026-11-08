@@ -16,7 +16,7 @@ function fold(line: string): string {
 export function buildIcs(items: Sch[], now = new Date()): string {
   const stamp = `${ymd(now)}T${pad(now.getUTCHours())}${pad(now.getUTCMinutes())}${pad(now.getUTCSeconds())}Z`
   const lines = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Grantly//Scholarship deadlines//EN', 'CALSCALE:GREGORIAN', 'METHOD:PUBLISH']
-  for (const s of items) {
+  for (const s of items.filter((item) => item.deadline)) {
     const start = new Date(`${s.deadline}T00:00:00Z`)
     const end = new Date(start.getTime() + 864e5)
     lines.push(

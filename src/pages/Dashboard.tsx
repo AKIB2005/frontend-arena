@@ -7,19 +7,23 @@ import { SegmentedMeter } from '../components/SegmentedMeter'
 import { Due } from '../components/Due'
 import { ButtonLink } from '../components/ui/Button'
 import { Card } from '../components/ui/Card'
+import { isClosed } from '../lib/dates'
 
 export default function Dashboard() {
   const profile = useApp((s) => s.profile)
   const apps = useApp((s) => s.apps)
   const matches = useMatches()
-  const recommended = DATA.map((s) => ({ s, m: matches.get(s.id)! }))
+  const recommended = DATA.filter((s) => !isClosed(s.deadline))
+    .map((s) => ({ s, m: matches.get(s.id)! }))
     .sort((a, b) => b.m.score - a.m.score)
     .slice(0, 4)
   const tracked = new Set(apps.map((a) => a.id))
   const closing = DATA.filter(
-    (s) => !tracked.has(s.id) && daysLeft(s.deadline) >= 0,
+    (s) => !tracked.has(s.id) && !!s.deadline && !isClosed(s.deadline),
   )
-    .sort((a, b) => a.deadline.localeCompare(b.deadline))
+    .sort((a, b) =>
+      (a.deadline ?? '9999-12-31').localeCompare(b.deadline ?? '9999-12-31'),
+    )
     .slice(0, 3)
   const profileFields = [
     profile.level,
@@ -129,7 +133,7 @@ export default function Dashboard() {
             {Array.from({ length: 30 }, (_, index) => (
               <span
                 key={index}
-                className={`flex-1 border-2 border-edge ${DATA.some((s) => daysLeft(s.deadline) === index) ? 'bg-accent' : 'bg-paper'}`}
+                className={`flex-1 border-2 border-edge ${DATA.some((s) => !isClosed(s.deadline) && daysLeft(s.deadline) === index) ? 'bg-accent' : 'bg-paper'}`}
               />
             ))}
           </div>

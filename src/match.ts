@@ -1,4 +1,4 @@
-import type {Sch} from './data'
+import type {Sch} from './data.real'
 import {daysUntil} from './lib/dates'
 export type Profile={name:string;level:string;field:string;cat:string;gender:''|'f'|'m';state:string;income:number|null;pct:number|null}
 export type Check={label:string;status:'met'|'unmet'|'unknown'}
@@ -19,4 +19,4 @@ export function match(s:Sch,p:Profile){
   return{checks,met,known:known.length,score:known.length?Math.round(met/known.length*100):0}
 }
 export const money=inr
-export const daysLeft = (d: string) => daysUntil(d)
+export const daysLeft = (d: string | null) => daysUntil(d)

@@ -55,6 +55,13 @@ export function ScholarshipCard({ s, score, checks, onQuickView }: Props) {
           Strong match
         </Sticker>
       )}
+      <Sticker
+        rotate={-3}
+        tone={s.isSample ? 'plain' : 'accent'}
+        className="absolute -top-3 left-3 z-20 py-0.5 text-xs"
+      >
+        {s.isSample ? 'Sample' : 'Real'}
+      </Sticker>
       <Stamp id={s.id} />
       <div className="relative z-10 flex min-h-[12rem] gap-4">
         <Tooltip
@@ -80,6 +87,9 @@ export function ScholarshipCard({ s, score, checks, onQuickView }: Props) {
           <p data-testid="scholarship-provider" className="text-sm text-muted">
             {s.provider}
           </p>
+          <p className="mt-1 text-xs text-muted">
+            {s.lastVerified ? `Checked ${s.lastVerified}` : 'Sample record'}
+          </p>
           <p className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1">
             <span
               data-testid="scholarship-amount"
@@ -92,6 +102,20 @@ export function ScholarshipCard({ s, score, checks, onQuickView }: Props) {
             </span>
           </p>
         </div>
+        {s.sourceUrl ? (
+          <a
+            href={s.sourceUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="relative z-10 text-sm font-bold underline underline-offset-2"
+          >
+            Check official page<span className="sr-only">: {s.name}</span>
+          </a>
+        ) : (
+          <p className="relative z-10 text-xs text-muted">
+            No official source recorded for this sample.
+          </p>
+        )}
       </div>
       <div className="relative z-10 grid min-h-[4.25rem] content-center gap-2 rounded-lg border-2 border-edge bg-surface p-2 text-sm text-fg transition-[transform,opacity] duration-200 sm:opacity-0 sm:translate-y-2 sm:group-hover/card:translate-y-0 sm:group-hover/card:opacity-100 sm:group-focus-within/card:translate-y-0 sm:group-focus-within/card:opacity-100">
         <p className="font-bold">

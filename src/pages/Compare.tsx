@@ -32,7 +32,10 @@ export default function Compare() {
     )
 
   const bestAmount = Math.max(...cols.map((c) => c.s.amount))
-  const bestDate = cols.map((c) => c.s.deadline).sort()[0]
+  const bestDate = cols
+    .map((c) => c.s.deadline)
+    .filter((d): d is string => !!d)
+    .sort()[0]
   const bestScore = Math.max(...cols.map((c) => c.m.score))
 
   return (
@@ -84,12 +87,14 @@ export default function Compare() {
                 <div>
                   <dt className="text-sm text-muted">Deadline</dt>
                   <dd className="flex flex-wrap items-center gap-2 font-bold">
-                    {new Date(s.deadline).toLocaleDateString('en-IN', {
-                      day: 'numeric',
-                      month: 'short',
-                    })}{' '}
+                    {s.deadline
+                      ? new Date(s.deadline).toLocaleDateString('en-IN', {
+                          day: 'numeric',
+                          month: 'short',
+                        })
+                      : 'Rolling or no deadline stated'}{' '}
                     <Due d={s.deadline} />
-                    {s.deadline === bestDate && (
+                    {bestDate && s.deadline === bestDate && (
                       <Sticker tone="accent" rotate={2}>
                         Most time
                       </Sticker>

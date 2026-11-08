@@ -8,6 +8,7 @@ import { HelpDialog } from './HelpDialog'
 import { Stepper } from './Stepper'
 import { Toaster } from './Toaster'
 import { CommandPalette } from './CommandPalette'
+import { Dialog } from './Dialog'
 import * as TooltipPrimitive from '@radix-ui/react-tooltip'
 
 const TITLES: Record<string, string> = {
@@ -177,6 +178,7 @@ export function Layout({ children }: { children: ReactNode }) {
   const first = useRef(true)
   const [wipe, setWipe] = useState(0)
   const [scrolled, setScrolled] = useState(false)
+  const [dataDialog, setDataDialog] = useState(false)
   useShortcuts()
   useScrollReveal(pathname, reduce)
 
@@ -348,8 +350,16 @@ export function Layout({ children }: { children: ReactNode }) {
         </main>
         <footer className="border-t-2 border-edge bg-surface px-4 py-6 text-center text-sm text-muted">
           <p>
-            Sample data: all scholarships are fictional and for demonstration.
+            This list mixes records compiled from published listings and clearly
+            labelled samples. Check the official site before applying.
           </p>
+          <button
+            type="button"
+            onClick={() => setDataDialog(true)}
+            className="mt-3 font-bold text-fg underline underline-offset-2"
+          >
+            How we check our data
+          </button>
           <button
             type="button"
             onClick={toggleReduceMotion}
@@ -376,6 +386,35 @@ export function Layout({ children }: { children: ReactNode }) {
         <Confetti />
         <HelpDialog />
         <CommandPalette />
+        <Dialog
+          open={dataDialog}
+          onClose={() => setDataDialog(false)}
+          labelledBy="data-dialog-title"
+          variant="center"
+        >
+          <div className="flex items-start justify-between gap-4">
+            <h2 id="data-dialog-title" className="text-2xl font-extrabold">
+              How we check our data
+            </h2>
+            <button
+              type="button"
+              onClick={() => setDataDialog(false)}
+              className="min-h-[44px] rounded-lg border-2 border-edge px-3 font-bold"
+            >
+              Close
+            </button>
+          </div>
+          <p className="mt-4">
+            Real records are added from official pages, with the source URL and
+            date checked recorded in our data log. Missing facts stay unknown
+            rather than being inferred. Samples are labelled separately.
+          </p>
+          <p className="mt-3 text-muted">
+            Published information can change after a check, and this project
+            does not guarantee eligibility or application outcomes. Confirm
+            every detail on the official site before applying.
+          </p>
+        </Dialog>
       </TooltipPrimitive.Provider>
     </div>
   )

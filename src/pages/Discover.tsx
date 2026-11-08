@@ -10,6 +10,7 @@ import {
 import { AnimatePresence, motion } from 'framer-motion'
 import { DATA, type Sch } from '../data'
 import { daysLeft } from '../match'
+import { isClosed } from '../lib/dates'
 import { useApp } from '../store'
 import { CT, FD, LV } from '../lib/options'
 import { CompareBar } from '../components/CompareBar'
@@ -67,6 +68,7 @@ export default function Discover() {
   const [cat, setCat] = useState('')
   const [win, setWin] = useState('0')
   const [only, setOnly] = useState(false)
+  const [origin, setOrigin] = useState('all')
   const [sort, setSort] = useState('match')
   const [isPending, startTransition] = useTransition()
   const [loading, setLoading] = useState(!introDone)
@@ -91,33 +93,61 @@ export default function Discover() {
     return () => window.clearTimeout(t)
   }, [])
 
-  const rows = useMemo(() => {
+  const filterRows = (includeClosed: boolean) => {
     const w = Number(win)
     return DATA.map((s) => ({ s, m: matches.get(s.id)! }))
       .filter(
         ({ s, m }) =>
           (!deferredQuery ||
-            (s.name + s.provider)
+            (s.name + s.provider + (s.tags ?? []).join(' '))
               .toLowerCase()
               .includes(deferredQuery.toLowerCase())) &&
+          (origin === 'all' ||
+            (origin === 'real' && !s.isSample) ||
+            (origin === 'sample' && s.isSample)) &&
           (!lvl || s.levels.includes(lvl)) &&
           (!fld ||
             fld === 'Any' ||
             s.fields.includes('Any') ||
             s.fields.includes(fld)) &&
           (!cat || !s.cats.length || s.cats.includes(cat)) &&
-          daysLeft(s.deadline) >= 0 &&
-          (!w || daysLeft(s.deadline) <= w) &&
+          (includeClosed ? isClosed(s.deadline) : !isClosed(s.deadline)) &&
+          (!w || (daysLeft(s.deadline) <= w && daysLeft(s.deadline) >= 0)) &&
           (!only || m.score >= 70),
       )
       .sort((a, b) =>
         sort === 'match'
-          ? b.m.score - a.m.score
+          ? b.m.score - a.m.score ||
+            (daysLeft(a.s.deadline) - daysLeft(b.s.deadline))
           : sort === 'amount'
             ? b.s.amount - a.s.amount
-            : a.s.deadline.localeCompare(b.s.deadline),
+            : (a.s.deadline ?? '9999-12-31').localeCompare(
+                b.s.deadline ?? '9999-12-31',
+              ),
       )
-  }, [matches, deferredQuery, lvl, fld, cat, win, only, sort])
+  }
+  const rows = useMemo(() => filterRows(false), [
+    matches,
+    deferredQuery,
+    lvl,
+    fld,
+    cat,
+    win,
+    only,
+    origin,
+    sort,
+  ])
+  const closedRows = useMemo(() => filterRows(true), [
+    matches,
+    deferredQuery,
+    lvl,
+    fld,
+    cat,
+    win,
+    only,
+    origin,
+    sort,
+  ])
 
   const clear = () => {
     setQ('')
@@ -126,6 +156,7 @@ export default function Discover() {
     setCat('')
     setWin('0')
     setOnly(false)
+    setOrigin('all')
   }
   const activeFilters = [
     lvl,
@@ -133,10 +164,11 @@ export default function Discover() {
     cat,
     win !== '0' ? win : '',
     only ? 'strong' : '',
+    origin !== 'all' ? origin : '',
   ].filter(Boolean).length
   const strongCount = rows.filter(({ m }) => m.score >= 70).length
 
-  const open = DATA.filter((s) => daysLeft(s.deadline) >= 0)
+  const open = DATA.filter((s) => !isClosed(s.deadline))
   const openStrong = open.filter((s) => (matches.get(s.id)?.score ?? 0) >= 70)
   const closing = open.filter((s) => daysLeft(s.deadline) <= 14)
   const nOpen = useCountUp(open.length, 700)
@@ -266,6 +298,16 @@ export default function Discover() {
                   ))}
                 </Pick>
                 <Pick
+                  id="f-origin"
+                  label="Show"
+                  value={origin}
+                  onChange={(v) => startTransition(() => setOrigin(v))}
+                >
+                  <option value="all">All</option>
+                  <option value="real">Real only</option>
+                  <option value="sample">Sample only</option>
+                </Pick>
+                <Pick
                   id="f-fld"
                   label="Field"
                   value={fld}
@@ -368,7 +410,9 @@ export default function Discover() {
         ) : (
           <Card className="text-center">
             <p className="text-lg font-extrabold">
-              No scholarships match these filters.
+              {origin === 'real'
+                ? 'No real records match. Try All.'
+                : 'No scholarships match these filters.'}
             </p>
             <p className="mb-4 text-muted">
               Clear the filters or turn off “Strong matches only”.
@@ -381,6 +425,28 @@ export default function Discover() {
               Clear filters
             </button>
           </Card>
+        )}
+        {closedRows.length > 0 && (
+          <details className="mt-8">
+            <summary className="cursor-pointer rounded-xl border-2 border-edge bg-surface p-4 font-extrabold">
+              Closed ({closedRows.length})
+            </summary>
+            <ul className="mt-4 grid gap-5 md:grid-cols-2">
+              {closedRows.map(({ s, m }) => (
+                <li key={s.id} className="opacity-75">
+                  <ScholarshipCard
+                    s={s}
+                    score={m.score}
+                    checks={m.checks}
+                    onQuickView={(sch, el) => {
+                      trigger.current = el
+                      setQuick(sch)
+                    }}
+                  />
+                </li>
+              ))}
+            </ul>
+          </details>
         )}
         {!profile.level && !loading && (
           <p className="mt-6 text-muted">

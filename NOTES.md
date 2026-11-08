@@ -151,3 +151,9 @@ The Playwright hover regression suite passed 8 tests in light and dark themes, i
 **Tests and checks.** `src/lib`: 9 unit tests pass. All 12 e2e tests pass. The `contrastRatio` helper in `e2e/hover-visibility.spec.ts` was parsing channel values as hex (`Number('0a')` is `NaN`), so it only passed when the card list had not rendered yet. It now reads the decimal `rgb()` values. The e2e timeout in `playwright.config.ts` is 30s because the scroll test walks about 20 positions. axe-core (WCAG A/AA + best practice) reports 0 violations on 8 routes in light and dark. No horizontal scroll at 375, 768 or 1280px.
 
 **Not checked.** Real phones, Safari/Firefox, a screen reader. `npm run contrast` and `npm run format:check` were not re-run beyond Prettier on touched files.
+## Final data phase
+
+- Split the catalogue into `src/data.real.ts` and clearly labelled `src/data.sample.ts` records.
+- Added the data inbox/log templates, validation and manual link-check scripts.
+- Added real/sample labels, checked-date/source-link surfaces, closed deadline handling, data filtering, and the data-check dialog.
+- Kept the existing records as samples because no official URLs or verification dates were supplied.

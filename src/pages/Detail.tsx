@@ -66,23 +66,49 @@ export default function Detail() {
               {s.name}
             </h1>
             <p className="text-muted">{s.provider}</p>
+            <div className="mt-2 flex flex-wrap items-center gap-2 text-sm">
+              <Sticker tone={s.isSample ? 'plain' : 'accent'} rotate={-2}>
+                {s.isSample ? 'Sample' : 'Real'}
+              </Sticker>
+              <span className="text-muted">
+                {s.lastVerified ? `Checked ${s.lastVerified}` : 'Sample record'}
+              </span>
+            </div>
             <p className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1">
               <span className="font-head text-2xl font-extrabold">
                 {money(s.amount)}
               </span>
               <span className="text-muted">
-                Closes{' '}
-                {new Date(s.deadline).toLocaleDateString('en-IN', {
-                  day: 'numeric',
-                  month: 'short',
-                  year: 'numeric',
-                })}
+                {s.deadline
+                  ? `Closes ${new Date(s.deadline).toLocaleDateString('en-IN', {
+                      day: 'numeric',
+                      month: 'short',
+                      year: 'numeric',
+                    })}`
+                  : 'Rolling or no deadline stated'}
               </span>
               <Due d={s.deadline} />
             </p>
           </div>
         </div>
         <p className="mt-4">{s.desc}</p>
+        <p className="mt-3 text-sm text-muted">
+          Deadlines change often. Confirm on the official site before applying.
+        </p>
+        {s.sourceUrl ? (
+          <a
+            href={s.sourceUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-3 inline-flex min-h-[44px] items-center font-bold underline underline-offset-2"
+          >
+            Check official page<span className="sr-only">: {s.name}</span>
+          </a>
+        ) : (
+          <p className="mt-3 text-sm text-muted">
+            No official source recorded for this sample.
+          </p>
+        )}
         <div className="mt-5">
           {saved ? (
             <ButtonLink to="/tracker" variant="ghost">
@@ -93,6 +119,14 @@ export default function Detail() {
           )}
         </div>
       </Card>
+      <a
+        href={`https://github.com/AKIB2005/frontend-arena/issues/new?title=${encodeURIComponent(`Outdated information: ${s.name}`)}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="mt-5 inline-flex min-h-[44px] items-center text-sm font-bold underline underline-offset-2"
+      >
+        Report outdated information
+      </a>
 
       <section className="mt-10" aria-labelledby="el">
         <h2 id="el" className="section-title text-2xl font-extrabold">

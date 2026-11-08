@@ -14,6 +14,7 @@ import { Stamp } from '../components/Stamp'
 import { Button, ButtonLink } from '../components/ui/Button'
 import { Card } from '../components/ui/Card'
 import { controlClass } from '../components/ui/Field'
+import { isClosed } from '../lib/dates'
 
 type Item = { a: Tracked; s: Sch }
 const TOTAL_AVAILABLE = DATA.reduce((t, s) => t + s.amount, 0)
@@ -127,8 +128,10 @@ export default function Tracker() {
     (x) => x.a.status === 'applying' || x.a.status === 'submitted',
   ).length
   const closing = [...open]
-    .filter((x) => daysLeft(x.s.deadline) >= 0)
-    .sort((a, b) => a.s.deadline.localeCompare(b.s.deadline))
+    .filter((x) => !!x.s.deadline && !isClosed(x.s.deadline))
+    .sort((a, b) =>
+      (a.s.deadline ?? '9999-12-31').localeCompare(b.s.deadline ?? '9999-12-31'),
+    )
     .slice(0, 3)
 
   const docNeeds = new Map<string, { need: number; ready: number }>()
@@ -154,7 +157,9 @@ export default function Tracker() {
       const n = daysLeft(x.s.deadline)
       return n >= 0 && n < 30
     })
-    .sort((a, b) => a.s.deadline.localeCompare(b.s.deadline))
+    .sort((a, b) =>
+      (a.s.deadline ?? '9999-12-31').localeCompare(b.s.deadline ?? '9999-12-31'),
+    )
 
   if (!items.length)
     return (
@@ -297,10 +302,12 @@ export default function Tracker() {
                   className="flex items-center justify-between gap-2"
                 >
                   <span className="truncate">
-                    {new Date(x.s.deadline).toLocaleDateString('en-IN', {
-                      day: 'numeric',
-                      month: 'short',
-                    })}
+                    {x.s.deadline
+                      ? new Date(x.s.deadline).toLocaleDateString('en-IN', {
+                          day: 'numeric',
+                          month: 'short',
+                        })
+                      : 'Rolling or no deadline stated'}
                     : <span className="font-bold">{x.s.name}</span>
                   </span>
                   <Due d={x.s.deadline} />

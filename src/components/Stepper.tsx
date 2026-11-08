@@ -22,7 +22,9 @@ export function Stepper() {
     .filter((a) => a.status === 'saved' || a.status === 'applying')
     .map((a) => DATA.find((s) => s.id === a.id))
     .filter((s): s is NonNullable<typeof s> => !!s)
-    .sort((a, b) => a.deadline.localeCompare(b.deadline))[0]
+    .sort((a, b) =>
+      (a.deadline ?? '9999-12-31').localeCompare(b.deadline ?? '9999-12-31'),
+    )[0]
   const steps = [
     { label: 'Profile', to: profile.level ? '/profile' : '/onboarding' },
     { label: 'Discover', to: '/discover' },

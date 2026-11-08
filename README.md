@@ -2,7 +2,7 @@
 
 **A transparent scholarship workspace for Indian students.**
 
-Grantly helps students discover relevant fictional scholarships, understand their eligibility, and track applications. It keeps matching local, explains each score, and highlights the next useful action.
+Grantly helps students discover scholarships, understand their eligibility, and track applications. It keeps matching local, explains each score, and highlights the next useful action.
 
 [Live demo: not published](./SUBMISSION_CHECKLIST.md) · [Demo video: not published](./SUBMISSION_CHECKLIST.md) · [Repository](https://github.com/AKIB2005/frontend-arena)
 
@@ -44,7 +44,7 @@ Grantly targets three pain points:
 
 ## Our approach
 
-Grantly is a personal scholarship workspace with three steps: **Discover**, **Match**, and **Track**. It is designed for Indian students across school, undergraduate, postgraduate, and PhD levels, with categories, states, and INR amounts represented in the sample data.
+Grantly is a personal scholarship workspace with three steps: **Discover**, **Match**, and **Track**. It is designed for Indian students across school, undergraduate, postgraduate, and PhD levels.
 
 The signature idea is a match score paired with a plain-language eligibility checklist. The visual system uses softened neo-brutalism: black and white surfaces, one signal-orange accent, hard shadows, and motion that confirms a state change.
 
@@ -63,6 +63,8 @@ The signature idea is a match score paired with a plain-language eligibility che
 
 - **Live match lab:** Home recalculates a ranked sample shortlist as income, percentage, category, or gender changes.
 - **Search and filters:** Discover supports search, level, field, category, deadline window, strong matches, and sorting.
+- **Record labels:** Real and sample records are labelled, with checked dates and official-page links where a source is recorded.
+- **Data filter:** Discover can show all records, real records only, or sample records only; closed records are grouped separately.
 - **Quick view:** Scholarship cards provide a compact preview before opening the detail route.
 - **Compare:** Discover can select up to three scholarships for side-by-side comparison.
 
@@ -149,7 +151,8 @@ src/
 │   └── ui/           buttons, cards, fields, sliders, stickers
 ├── pages/            route-level screens
 ├── lib/              motion, dates, coach, hints, ICS, actions
-├── data.ts           fictional scholarship records
+├── data.real.ts      official records and shared scholarship type
+├── data.sample.ts    clearly labelled demonstration records
 ├── match.ts          scoring contract
 ├── store.ts          persisted profile and tracker state
 └── main.tsx          React, router, and motion entry point
@@ -268,14 +271,18 @@ After deployment, verify direct refreshes on `/tracker` and `/s/1`, then check t
 
 ## Data and privacy
 
-All 24 scholarships are fictional sample data. All profile, tracker, theme, and motion preferences stay in browser `localStorage`; there are no accounts, analytics, or network calls. Reset profile and tracker data from **Profile → Reset all data**, after confirmation.
+The list mixes real records compiled from published listings and clearly labelled samples. Real records include their official source URL and checked date when supplied. Profile, tracker, theme, and motion preferences stay in browser `localStorage`; there are no accounts, analytics, or network calls. Reset profile and tracker data from **Profile → Reset all data**, after confirmation.
+
+### How to add a scholarship
+
+Copy the template in [`docs/DATA_INBOX.md`](./docs/DATA_INBOX.md), copy facts only from the official page, and submit the completed record for conversion into [`src/data.real.ts`](./src/data.real.ts). The data log records the URL, date checked, conflicts, and checker.
 
 ## Limitations and roadmap
 
 ### Known limitations
 
 - There is no backend and no real scholarship submission flow.
-- Data is fictional and deadlines are generated relative to the current date.
+- Published listings may become out of date. Deadlines and eligibility can change, so confirm every detail on the official site before applying.
 - Tracker drag-and-drop is not wired; stage buttons are the current interaction.
 - Lighthouse, axe, and physical-device verification remain outstanding.
 

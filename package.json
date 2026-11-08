@@ -13,9 +13,11 @@
     "preview": "vite preview",
     "test": "vitest run",
     "e2e": "playwright test",
+    "data:check": "node --experimental-strip-types scripts/data-check.ts",
+    "data:links": "node --experimental-strip-types scripts/data-links.ts",
     "lint": "eslint .",
     "contrast": "node --experimental-strip-types scripts/contrast.ts",
-    "check": "tsc --noEmit && npm run lint && npm test -- --run && npm run contrast && vite build",
+    "check": "tsc --noEmit && npm run lint && npm test -- --run && npm run data:check && npm run contrast && vite build",
     "format:check": "prettier --check src/App.tsx src/components/CommandPalette.tsx src/components/Layout.tsx src/index.css src/lib/matches.ts src/lib/motion.ts src/lib/ui-store.ts src/match.test.ts src/pages/Discover.tsx src/store.ts vitest.config.ts eslint.config.js .prettierrc"
   },
   "dependencies": {

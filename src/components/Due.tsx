@@ -1,6 +1,6 @@
 import { daysUntil } from '../lib/dates'
 
-export const isUrgent = (d: string) => {
+export const isUrgent = (d: string | null) => {
   const n = daysUntil(d)
   return n >= 0 && n <= 7
 }
@@ -10,15 +10,21 @@ export const isUrgent = (d: string) => {
  * it crossfades to the exact date. The exact date is always available to screen
  * readers through the visually hidden text, so no extra tab stop or aria-label is needed.
  */
-export function Due({ d }: { d: string }) {
+export function Due({ d }: { d: string | null }) {
   const n = daysUntil(d)
+  if (!d) return <span className="text-muted">Rolling or no deadline stated</span>
   const text =
     n < 0
       ? 'Closed'
       : n === 0
         ? 'Closes today'
         : `${n} day${n === 1 ? '' : 's'} left`
-  if (n < 0) return <span className="text-muted">{text}</span>
+  if (n < 0)
+    return (
+      <span className="rounded-lg border-2 border-edge bg-paper px-2 py-0.5 text-sm font-bold text-fg">
+        {text}
+      </span>
+    )
   const exact = new Date(d).toLocaleDateString('en-IN', {
     day: 'numeric',
     month: 'short',
