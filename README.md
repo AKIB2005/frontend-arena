@@ -8,8 +8,11 @@ Grantly helps students discover scholarships, understand exactly why they do or 
 
 <!-- FILL BEFORE SUBMIT: replace the "Demo video" link above with the real video URL. -->
 
+<<<<<<< HEAD
 <!-- FILL BEFORE SUBMIT: capture these three screenshots into docs/screenshots/ with these exact names, then keep this table. -->
 
+=======
+>>>>>>> 632a439 (added screenshots)
 | Light desktop | Dark desktop | Mobile |
 | --- | --- | --- |
 | ![Grantly Discover page in light mode on desktop](./docs/screenshots/light-desktop.png) | ![Grantly Discover page in dark mode on desktop](./docs/screenshots/dark-desktop.png) | ![Grantly Discover page on a phone](./docs/screenshots/mobile.png) |
@@ -259,6 +262,10 @@ No environment variables are required.
 | `lint` | Run ESLint |
 | `test` | Run Vitest |
 | `e2e` | Run the Playwright hover regression suite |
+<<<<<<< HEAD
+=======
+| `screenshots` | Capture the README light, dark, and mobile screenshots |
+>>>>>>> 632a439 (added screenshots)
 | `check` | Run type-checking, lint, tests, contrast, and build |
 | `contrast` | Check token contrast and update the notes table |
 | `analyze` | Build with `dist/stats.html` bundle analysis |

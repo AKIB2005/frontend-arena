@@ -4,6 +4,6 @@
 - [Notes](../NOTES.md)
 - [Pitch](../PITCH.md)
 - [Submission checklist](../SUBMISSION_CHECKLIST.md)
-- [Screenshot capture status](./screenshots/README.md)
-
-Screenshots are not included because no browser capture was available during the freeze. Add reviewed light desktop, dark desktop, and mobile captures under `docs/screenshots/` before submission.
+- [Light desktop screenshot](./screenshots/light-desktop.png)
+- [Dark desktop screenshot](./screenshots/dark-desktop.png)
+- [Mobile screenshot](./screenshots/mobile.png)

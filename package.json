@@ -13,6 +13,7 @@
     "preview": "vite preview",
     "test": "vitest run",
     "e2e": "playwright test",
+    "screenshots": "node --experimental-strip-types scripts/screenshots.ts",
     "data:check": "node --experimental-strip-types scripts/data-check.ts",
     "data:links": "node --experimental-strip-types scripts/data-links.ts",
     "lint": "eslint .",
