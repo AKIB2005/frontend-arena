@@ -250,18 +250,26 @@
   }
 }
 
+/* Reduced motion: honoured from the device setting, or from the explicit header toggle.
+   Choosing "animations on" in the header adds .motion-on, which overrides the device setting. */
+:root.reduce-motion *,
+:root.reduce-motion *::before,
+:root.reduce-motion *::after {
+  transition: none !important;
+  animation: none !important;
+  scroll-behavior: auto !important;
+}
+:root.reduce-motion .pop-in,
+:root.reduce-motion .fold-in {
+  transform: none !important;
+}
 @media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
+  :root:not(.motion-on) *,
+  :root:not(.motion-on) *::before,
+  :root:not(.motion-on) *::after {
     transition: none !important;
     animation: none !important;
     scroll-behavior: auto !important;
-  }
-  .pop-in,
-  .fold-in {
-    animation: none !important;
-    transform: none !important;
   }
 }
 
@@ -282,4 +290,108 @@
   :focus-visible {
     outline: 3px solid Highlight;
   }
+}
+
+/* ---------- Motion + polish (appended) ---------- */
+:root {
+  --ease-enter: cubic-bezier(0.16, 1, 0.3, 1);
+}
+::selection {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+/* Scroll reveal. Movement only, never opacity, so content can never end up hidden. */
+[data-reveal='pending'] {
+  translate: 0 40px;
+}
+[data-reveal='in'] {
+  animation: reveal-up 0.7s var(--ease-enter) backwards;
+  animation-delay: calc(var(--ri, 0) * 85ms);
+}
+@keyframes reveal-up {
+  from {
+    translate: 0 40px;
+  }
+  to {
+    translate: 0 0;
+  }
+}
+
+/* Ambient motion */
+@keyframes float {
+  0%,
+  100% {
+    translate: 0 0;
+  }
+  50% {
+    translate: 0 -7px;
+  }
+}
+@keyframes wiggle {
+  0%,
+  100% {
+    rotate: -2deg;
+  }
+  50% {
+    rotate: 2deg;
+  }
+}
+@keyframes shine {
+  from {
+    transform: translateX(-130%) skewX(-18deg);
+  }
+  to {
+    transform: translateX(330%) skewX(-18deg);
+  }
+}
+@keyframes bar-grow {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+.float {
+  animation: float 3.2s ease-in-out infinite;
+}
+.float-slow {
+  animation: float 4.6s ease-in-out infinite;
+  animation-delay: -1.4s;
+}
+.wiggle {
+  animation: wiggle 2.6s ease-in-out infinite;
+}
+.shine::after {
+  content: '';
+  pointer-events: none;
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 28%;
+  background: rgb(255 255 255 / 0.55);
+  transform: translateX(-130%) skewX(-18deg);
+  animation: shine 3.4s var(--ease-enter) 1.2s infinite;
+}
+.bar-grow {
+  transform-origin: left;
+  animation: bar-grow 0.8s var(--ease-enter) 0.2s both;
+}
+.logo-mark {
+  transition: transform 0.35s var(--ease-enter);
+}
+a:hover > .logo-mark,
+a:focus-visible > .logo-mark {
+  transform: rotate(-12deg) scale(1.12);
+}
+h2.section-title::after {
+  content: '';
+  display: block;
+  height: 6px;
+  width: 3.5rem;
+  margin-top: 0.4rem;
+  border: 2px solid var(--edge);
+  background: var(--accent);
+  transform-origin: left;
+  animation: bar-grow 0.7s var(--ease-enter) 0.25s both;
 }

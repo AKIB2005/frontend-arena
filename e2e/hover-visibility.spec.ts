@@ -3,24 +3,15 @@ import { expect, test, type Page } from '@playwright/test'
 const routes = ['/discover', '/dashboard', '/tracker', '/compare']
 
 function contrastRatio(foreground: string, background: string) {
-  const channel = (value: string, offset: number) => {
-    const component = Number(value.slice(offset, offset + 2)) / 255
+  const channel = (value: number) => {
+    const component = value / 255
     return component <= 0.03928
       ? component / 12.92
       : ((component + 0.055) / 1.055) ** 2.4
   }
   const luminance = (value: string) => {
-    const hex = value
-      .replace(/^rgba?\(/, '')
-      .replace(/\)$/, '')
-      .split(',')
-      .map((part) => Number(part.trim()).toString(16).padStart(2, '0'))
-      .join('')
-    return (
-      0.2126 * channel(hex, 0) +
-      0.7152 * channel(hex, 2) +
-      0.0722 * channel(hex, 4)
-    )
+    const [r, g, b] = (value.match(/[\d.]+/g) ?? []).slice(0, 3).map(Number)
+    return 0.2126 * channel(r) + 0.7152 * channel(g) + 0.0722 * channel(b)
   }
   const light = Math.max(luminance(foreground), luminance(background))
   const dark = Math.min(luminance(foreground), luminance(background))

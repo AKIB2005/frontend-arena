@@ -135,3 +135,19 @@ Everything in the brief's priority list, steps 1 to 11, including the bottom-of-
 - Kept hover movement within the existing 2px utility lift; no tilt was added.
 
 The Playwright hover regression suite passed 8 tests in light and dark themes, including keyboard focus checks and hover screenshots. The local computed-style reproduction and project check suite pass; see [HOVER_BUG.md](./HOVER_BUG.md).
+
+## Update: Discover scroll fix, more motion, UI pass
+
+**Bug fixed.** On Discover the entire filter card was `sticky top-2`. On a 375px phone it was 664px tall in a 700px viewport, so it covered the results while scrolling (about a third of the screen on desktop). It is now a slim sticky toolbar (search, Filters toggle, result count; ~90px on mobile) with the full filters in a collapsible panel that is open by default on large screens and closed on phones. The `Search and filters` region and `#search` shortcut target are preserved.
+
+**Animation, on by default.**
+- Page enter slides up; route change keeps the circular wipe, slightly slower. Durations raised (`DUR` 0.18/0.35/0.55s, `MAX` 0.7s).
+- Scroll reveal: blocks and cards slide up as they enter the viewport, staggered. It moves elements only and never touches opacity, so nothing can be left hidden (your e2e test asserts `opacity: 1` on every card at every scroll position). Very tall containers are skipped, because tilting or offsetting a 7000px section pushed the page sideways during development.
+- Word-by-word headline on Home and Discover, floating stickers, a shine on the main CTA, animated stat counters, growing accent bars under section titles, livelier button hover/press, a "Strong match" tag on cards of 70% or more.
+- Reduce motion is now tri-state: follow the device until you choose. If the device asks for reduced motion, a banner explains why animations are off and offers "Turn animations on" (stored as an explicit choice). The header "Reduce motion" button and the footer one still work. `MotionConfig` and the CSS rules both honour the choice.
+
+**UI.** Discover hero banner with live counters, logo mark in the header, accent selection colour, sentence-case Dashboard label with a readable accent colour.
+
+**Tests and checks.** `src/lib`: 9 unit tests pass. All 12 e2e tests pass. The `contrastRatio` helper in `e2e/hover-visibility.spec.ts` was parsing channel values as hex (`Number('0a')` is `NaN`), so it only passed when the card list had not rendered yet. It now reads the decimal `rgb()` values. The e2e timeout in `playwright.config.ts` is 30s because the scroll test walks about 20 positions. axe-core (WCAG A/AA + best practice) reports 0 violations on 8 routes in light and dark. No horizontal scroll at 375, 768 or 1280px.
+
+**Not checked.** Real phones, Safari/Firefox, a screen reader. `npm run contrast` and `npm run format:check` were not re-run beyond Prettier on touched files.

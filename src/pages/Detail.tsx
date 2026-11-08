@@ -95,7 +95,7 @@ export default function Detail() {
       </Card>
 
       <section className="mt-10" aria-labelledby="el">
-        <h2 id="el" className="text-2xl font-extrabold">
+        <h2 id="el" className="section-title text-2xl font-extrabold">
           Do you qualify?
         </h2>
         <p className="mb-3 text-muted">
@@ -129,7 +129,7 @@ export default function Detail() {
         <Sticker tone="accent" rotate={-2} className="mb-3">
           Coach notes
         </Sticker>
-        <h2 id="coach" className="text-2xl font-extrabold">
+        <h2 id="coach" className="section-title text-2xl font-extrabold">
           Your next best move
         </h2>
         <p className="mt-2 max-w-[65ch]">{coach.summary}</p>
@@ -151,7 +151,7 @@ export default function Detail() {
         <Sticker tone="accent" rotate={2} className="mb-3">
           Just exploring
         </Sticker>
-        <h2 id="what" className="text-2xl font-extrabold">
+        <h2 id="what" className="section-title text-2xl font-extrabold">
           What would change my score?
         </h2>
         <p className="mb-4 text-muted">
@@ -236,7 +236,7 @@ export default function Detail() {
 
       <div className="mt-10 grid gap-8 sm:grid-cols-2">
         <section aria-labelledby="dc">
-          <h2 id="dc" className="text-2xl font-extrabold">
+          <h2 id="dc" className="section-title text-2xl font-extrabold">
             Documents to keep ready
           </h2>
           <ul className="mt-3 space-y-2">
@@ -251,7 +251,7 @@ export default function Detail() {
           </ul>
         </section>
         <section aria-labelledby="sp">
-          <h2 id="sp" className="text-2xl font-extrabold">
+          <h2 id="sp" className="section-title text-2xl font-extrabold">
             How to apply
           </h2>
           <ol className="relative mt-3 ml-4 space-y-4 border-l-2 border-edge pl-8">

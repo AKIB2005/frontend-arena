@@ -22,9 +22,18 @@ function initialTheme(): Theme {
     return 'light'
   }
 }
-function initialReduceMotion(): boolean {
+/** null = follow the device setting. '0' is an explicit "animations on", '1' is an explicit "reduce". */
+function initialReduceMotion(): boolean | null {
   try {
-    return localStorage.getItem(REDUCE_KEY) === '1'
+    const v = localStorage.getItem(REDUCE_KEY)
+    return v === '1' ? true : v === '0' ? false : null
+  } catch {
+    return null
+  }
+}
+export const systemPrefersReducedMotion = (): boolean => {
+  try {
+    return window.matchMedia('(prefers-reduced-motion: reduce)').matches
   } catch {
     return false
   }
@@ -48,7 +57,7 @@ type UI = {
   setHelp: (v: boolean) => void
   commandOpen: boolean
   setCommandOpen: (v: boolean) => void
-  reduceMotion: boolean
+  reduceMotion: boolean | null
   toggleReduceMotion: () => void
 }
 
@@ -112,7 +121,8 @@ export const useUI = create<UI>((set, get) => ({
   setCommandOpen: (v) => set({ commandOpen: v }),
   reduceMotion: initialReduceMotion(),
   toggleReduceMotion: () => {
-    const reduceMotion = !get().reduceMotion
+    const current = get().reduceMotion ?? systemPrefersReducedMotion()
+    const reduceMotion = !current
     try {
       localStorage.setItem(REDUCE_KEY, reduceMotion ? '1' : '0')
     } catch {

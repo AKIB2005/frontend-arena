@@ -7,6 +7,7 @@ import {
   useTransition,
   type ReactNode,
 } from 'react'
+import { AnimatePresence, motion } from 'framer-motion'
 import { DATA, type Sch } from '../data'
 import { daysLeft } from '../match'
 import { useApp } from '../store'
@@ -18,6 +19,10 @@ import { CardSkeleton } from '../components/Skeleton'
 import { ButtonLink } from '../components/ui/Button'
 import { Card } from '../components/ui/Card'
 import { controlClass } from '../components/ui/Field'
+import { Sticker } from '../components/ui/Sticker'
+import { AnimatedHeadline } from '../components/AnimatedHeadline'
+import { useCountUp } from '../lib/hooks'
+import { useMotion } from '../lib/motion'
 import { useMatches } from '../lib/matches'
 
 // First-visit-only loading keeps the initial page from flashing incomplete data.
@@ -68,6 +73,14 @@ export default function Discover() {
   const [quick, setQuick] = useState<Sch | null>(null)
   const trigger = useRef<HTMLElement | null>(null)
   const deferredQuery = useDeferredValue(q)
+  const { tr } = useMotion()
+  const [showFilters, setShowFilters] = useState(() => {
+    try {
+      return window.matchMedia('(min-width: 1024px)').matches
+    } catch {
+      return false
+    }
+  })
 
   useEffect(() => {
     if (introDone) return
@@ -123,127 +136,208 @@ export default function Discover() {
   ].filter(Boolean).length
   const strongCount = rows.filter(({ m }) => m.score >= 70).length
 
+  const open = DATA.filter((s) => daysLeft(s.deadline) >= 0)
+  const openStrong = open.filter((s) => (matches.get(s.id)?.score ?? 0) >= 70)
+  const closing = open.filter((s) => daysLeft(s.deadline) <= 14)
+  const nOpen = useCountUp(open.length, 700)
+  const nStrong = useCountUp(openStrong.length, 700)
+  const nClosing = useCountUp(closing.length, 700)
+  const stats = [
+    { label: 'Open now', value: nOpen, final: open.length },
+    { label: 'Strong matches', value: nStrong, final: openStrong.length },
+    { label: 'Closing in 14 days', value: nClosing, final: closing.length },
+  ]
+
   return (
     <>
-      <h1 className="text-4xl font-extrabold sm:text-5xl">
-        Scholarships for you
-      </h1>
-      <p className="mt-2 max-w-2xl text-muted">
-        Sorted by how well you match. Add more to your profile and the scores
-        get sharper.
-      </p>
-
-      <Card
-        as="section"
-        aria-labelledby="filters"
-        className="sticky top-2 z-20 mt-6 border-b-4"
+      <section
+        aria-labelledby="discover-title"
+        className="relative overflow-hidden rounded-xl border-2 border-edge bg-accent p-6 text-on-accent shadow-hard sm:p-8"
       >
-        <h2 id="filters" className="sr-only">
-          Search and filters
-        </h2>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <div className="sm:col-span-2">
-            <label htmlFor="search" className="mb-1 block text-sm font-bold">
-              Search by name or provider{' '}
-              <span className="font-normal text-muted">
-                (press / to jump here)
-              </span>
+        <Sticker
+          rotate={3}
+          tone="plain"
+          className="float-slow absolute right-4 top-4 hidden sm:inline-block"
+        >
+          Updated daily
+        </Sticker>
+        <h1
+          id="discover-title"
+          className="max-w-2xl text-4xl font-extrabold leading-[1.05] sm:text-6xl"
+        >
+          <AnimatedHeadline text="Scholarships for you" />
+        </h1>
+        <p className="mt-3 max-w-2xl text-lg font-medium">
+          Sorted by how well you match. Add more to your profile and the scores
+          get sharper.
+        </p>
+        <ul className="mt-6 grid gap-3 sm:grid-cols-3">
+          {stats.map((st, i) => (
+            <li
+              key={st.label}
+              className="rounded-xl border-2 border-edge bg-surface p-3 text-fg shadow-hard-sm"
+            >
+              <p className="odometer font-head text-4xl font-extrabold">
+                <span aria-hidden="true">{st.value}</span>
+                <span className="sr-only">{st.final}</span>
+              </p>
+              <p className="text-sm font-bold">{st.label}</p>
+              <span
+                aria-hidden="true"
+                className="bar-grow mt-2 block h-1.5 rounded-full bg-accent"
+                style={{ animationDelay: `${0.3 + i * 0.12}s` }}
+              />
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      {/* Slim sticky toolbar: always reachable, never tall enough to cover results. */}
+      <div
+        data-no-reveal
+        className="sticky top-0 z-30 -mx-4 mt-6 border-b-2 border-edge bg-surface px-4 py-2"
+      >
+        <section
+          aria-labelledby="filters"
+          className="mx-auto flex max-w-6xl flex-wrap items-center gap-2"
+        >
+          <h2 id="filters" className="sr-only">
+            Search and filters
+          </h2>
+          <div className="min-w-0 flex-1 basis-48">
+            <label htmlFor="search" className="sr-only">
+              Search by name or provider (press / to jump here)
             </label>
             <input
               id="search"
               type="search"
               className={controlClass}
-              placeholder="e.g. merit, women, law"
+              placeholder="Search scholarships  ( / )"
               value={q}
               onChange={(e) => setQ(e.target.value)}
             />
           </div>
-          <Pick
-            id="f-lvl"
-            label="Study level"
-            value={lvl}
-            onChange={(v) => startTransition(() => setLvl(v))}
+          <button
+            type="button"
+            aria-expanded={showFilters}
+            aria-controls="filter-panel"
+            onClick={() => setShowFilters((v) => !v)}
+            className="min-h-[44px] rounded-xl border-2 border-edge bg-surface px-4 font-bold shadow-hard-sm transition-[transform,box-shadow] duration-200 active:translate-x-0.5 active:translate-y-0.5 active:shadow-none can-hover:hover:-translate-y-0.5"
           >
-            <option value="">All levels</option>
-            {LV.map((o) => (
-              <option key={o}>{o}</option>
-            ))}
-          </Pick>
-          <Pick
-            id="f-fld"
-            label="Field"
-            value={fld}
-            onChange={(v) => startTransition(() => setFld(v))}
+            Filters{activeFilters > 0 ? ` (${activeFilters})` : ''}
+            <span aria-hidden="true" className="ml-2 inline-block">
+              {showFilters ? '−' : '+'}
+            </span>
+          </button>
+          <p
+            role="status"
+            aria-live="polite"
+            className="w-full text-sm font-bold sm:w-auto"
           >
-            <option value="">All fields</option>
-            {FD.map((o) => (
-              <option key={o}>{o}</option>
-            ))}
-          </Pick>
-          <Pick
-            id="f-cat"
-            label="Category"
-            value={cat}
-            onChange={(v) => startTransition(() => setCat(v))}
-          >
-            <option value="">All categories</option>
-            {CT.map((o) => (
-              <option key={o}>{o}</option>
-            ))}
-          </Pick>
-          <Pick
-            id="f-win"
-            label="Deadline"
-            value={win}
-            onChange={(v) => startTransition(() => setWin(v))}
-          >
-            <option value="0">Any deadline</option>
-            <option value="14">Within 14 days</option>
-            <option value="30">Within 30 days</option>
-            <option value="90">Within 90 days</option>
-          </Pick>
-          <Pick
-            id="f-sort"
-            label="Sort by"
-            value={sort}
-            onChange={(v) => startTransition(() => setSort(v))}
-          >
-            <option value="match">Best match</option>
-            <option value="deadline">Soonest deadline</option>
-            <option value="amount">Highest amount</option>
-          </Pick>
-          <label className="flex min-h-[44px] items-center gap-3 self-end font-bold">
-            <input
-              type="checkbox"
-              checked={only}
-              onChange={(e) => setOnly(e.target.checked)}
-              className="h-6 w-6 accent-accent"
-            />
-            Strong matches only
-          </label>
-        </div>
-        <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t-2 border-dashed border-edge pt-3 text-sm">
-          <p role="status" aria-live="polite" className="font-bold">
-            {rows.length} scholarships, {strongCount} strong matches
+            {rows.length} scholarship{rows.length === 1 ? '' : 's'},{' '}
+            {strongCount} strong match{strongCount === 1 ? '' : 'es'}
           </p>
-          {activeFilters > 0 && (
-            <button
-              type="button"
-              onClick={clear}
-              className="min-h-[44px] rounded-lg border-2 border-edge bg-surface px-3 font-bold transition-[transform,opacity] duration-200 can-hover:hover:-translate-y-0.5 focus-visible:-translate-y-0.5"
-            >
-              Clear all ({activeFilters})
-            </button>
-          )}
-        </div>
-      </Card>
+        </section>
+      </div>
+
+      <AnimatePresence initial={false}>
+        {showFilters && (
+          <motion.div
+            key="panel"
+            id="filter-panel"
+            data-no-reveal
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={tr({ duration: 0.4, ease: [0.16, 1, 0.3, 1] })}
+            className="overflow-hidden"
+          >
+            <Card className="mt-4">
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                <Pick
+                  id="f-lvl"
+                  label="Study level"
+                  value={lvl}
+                  onChange={(v) => startTransition(() => setLvl(v))}
+                >
+                  <option value="">All levels</option>
+                  {LV.map((o) => (
+                    <option key={o}>{o}</option>
+                  ))}
+                </Pick>
+                <Pick
+                  id="f-fld"
+                  label="Field"
+                  value={fld}
+                  onChange={(v) => startTransition(() => setFld(v))}
+                >
+                  <option value="">All fields</option>
+                  {FD.map((o) => (
+                    <option key={o}>{o}</option>
+                  ))}
+                </Pick>
+                <Pick
+                  id="f-cat"
+                  label="Category"
+                  value={cat}
+                  onChange={(v) => startTransition(() => setCat(v))}
+                >
+                  <option value="">All categories</option>
+                  {CT.map((o) => (
+                    <option key={o}>{o}</option>
+                  ))}
+                </Pick>
+                <Pick
+                  id="f-win"
+                  label="Deadline"
+                  value={win}
+                  onChange={(v) => startTransition(() => setWin(v))}
+                >
+                  <option value="0">Any deadline</option>
+                  <option value="14">Within 14 days</option>
+                  <option value="30">Within 30 days</option>
+                  <option value="90">Within 90 days</option>
+                </Pick>
+                <Pick
+                  id="f-sort"
+                  label="Sort by"
+                  value={sort}
+                  onChange={(v) => startTransition(() => setSort(v))}
+                >
+                  <option value="match">Best match</option>
+                  <option value="deadline">Soonest deadline</option>
+                  <option value="amount">Highest amount</option>
+                </Pick>
+                <label className="flex min-h-[44px] items-center gap-3 self-end font-bold">
+                  <input
+                    type="checkbox"
+                    checked={only}
+                    onChange={(e) => setOnly(e.target.checked)}
+                    className="h-6 w-6 accent-accent"
+                  />
+                  Strong matches only
+                </label>
+                {activeFilters > 0 && (
+                  <button
+                    type="button"
+                    onClick={clear}
+                    className="min-h-[44px] self-end rounded-lg border-2 border-edge bg-surface px-3 font-bold transition-[transform,opacity] duration-200 can-hover:hover:-translate-y-0.5 focus-visible:-translate-y-0.5"
+                  >
+                    Clear all ({activeFilters})
+                  </button>
+                )}
+              </div>
+            </Card>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <section
         aria-labelledby="results"
-        className="mt-8 scroll-mt-[22rem] pb-28 pt-2"
+        className="mt-8 scroll-mt-24 pb-28 pt-2"
         aria-busy={isPending}
       >
-        <h2 id="results" className="mb-4 text-2xl font-extrabold">
+        <h2 id="results" className="section-title mb-5 text-2xl font-extrabold">
           {rows.length} scholarship{rows.length === 1 ? '' : 's'}
         </h2>
         {loading ? (
@@ -259,15 +353,15 @@ export default function Discover() {
           <ul className="grid gap-5 md:grid-cols-2">
             {rows.map(({ s, m }) => (
               <li key={s.id}>
-                  <ScholarshipCard
-                    s={s}
-                    score={m.score}
-                    checks={m.checks}
-                    onQuickView={(sch, el) => {
-                      trigger.current = el
-                      setQuick(sch)
-                    }}
-                  />
+                <ScholarshipCard
+                  s={s}
+                  score={m.score}
+                  checks={m.checks}
+                  onQuickView={(sch, el) => {
+                    trigger.current = el
+                    setQuick(sch)
+                  }}
+                />
               </li>
             ))}
           </ul>

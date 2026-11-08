@@ -10,6 +10,7 @@ import { Sticker } from '../components/ui/Sticker'
 import { RatchetRing } from '../components/RatchetRing'
 import { DEMO_PROFILE, useApp } from '../store'
 import { SPRING, useMotion } from '../lib/motion'
+import { AnimatedHeadline } from '../components/AnimatedHeadline'
 
 const DEMO_SAMPLES = DATA.slice(0, 5)
 const STEPS = [
@@ -100,14 +101,14 @@ export default function Home() {
         aria-labelledby="hero"
       >
         <div>
-          <Sticker tone="accent" rotate={-2} className="mb-5">
+          <Sticker tone="accent" rotate={-2} className="float mb-5">
             Live match lab
           </Sticker>
           <h1
             id="hero"
             className="text-5xl font-extrabold leading-[1.05] sm:text-6xl"
           >
-            See which scholarships you can actually win.
+            <AnimatedHeadline text="See which scholarships you can actually win." />
           </h1>
           <p className="mt-5 max-w-xl text-lg text-muted">
             Tell us a little about you. Every scholarship shows how well you
@@ -115,7 +116,7 @@ export default function Home() {
             ones worth applying for.
           </p>
           <div className="mt-8 flex flex-wrap gap-4">
-            <ButtonLink to="/onboarding" variant="primary">
+            <ButtonLink to="/onboarding" variant="primary" className="shine">
               Build my profile
             </ButtonLink>
             <ButtonLink to="/discover" variant="ghost">
@@ -143,7 +144,7 @@ export default function Home() {
             Try it live
           </Sticker>
           <div className="max-w-xl">
-            <h2 id="sample" className="text-2xl font-extrabold">
+            <h2 id="sample" className="section-title text-2xl font-extrabold">
               Watch your shortlist re-rank
             </h2>
             <p className="mt-1 text-muted">

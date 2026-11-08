@@ -11,6 +11,7 @@ import { Stamp } from './Stamp'
 import { Button, ButtonLink } from './ui/Button'
 import { Card } from './ui/Card'
 import { Tooltip } from './ui/Tooltip'
+import { Sticker } from './ui/Sticker'
 import type { Check } from '../match'
 
 type Props = {
@@ -46,6 +47,14 @@ export function ScholarshipCard({ s, score, checks, onQuickView }: Props) {
         aria-hidden="true"
         className="pointer-events-none absolute inset-0 -z-10 rounded-xl bg-surface"
       />
+      {score >= 70 && (
+        <Sticker
+          rotate={3}
+          className="float absolute -top-3 right-3 z-20 py-0.5 text-xs"
+        >
+          Strong match
+        </Sticker>
+      )}
       <Stamp id={s.id} />
       <div className="relative z-10 flex min-h-[12rem] gap-4">
         <Tooltip
@@ -90,6 +99,7 @@ export function ScholarshipCard({ s, score, checks, onQuickView }: Props) {
           {checks.length} criteria
         </p>
         <div
+          role="img"
           className="flex gap-1"
           aria-label={`${checks.filter((c) => c.status === 'met').length} met, ${checks.filter((c) => c.status === 'unmet').length} not met, ${checks.filter((c) => c.status === 'unknown').length} unknown`}
         >

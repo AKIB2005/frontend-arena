@@ -47,7 +47,7 @@ export default function Dashboard() {
     <div>
       <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
         <div>
-          <p className="text-sm font-bold uppercase tracking-[0.16em] text-accent">
+          <p className="text-sm font-bold text-accent-text">
             Your command centre
           </p>
           <h1 className="text-4xl font-extrabold">
@@ -65,7 +65,7 @@ export default function Dashboard() {
           aria-labelledby="today"
           className="lg:col-span-7 bg-fill-ink text-on-ink"
         >
-          <h2 id="today" className="text-2xl font-extrabold">
+          <h2 id="today" className="section-title text-2xl font-extrabold">
             Today
           </h2>
           <ol className="mt-4 grid gap-3">

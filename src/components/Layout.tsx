@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { AnimatePresence, motion } from 'framer-motion'
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { useUI } from '../lib/ui-store'
-import { DUR, useMotion } from '../lib/motion'
+import { DUR, pageEnter, useMotion } from '../lib/motion'
 import { Confetti } from './Confetti'
 import { HelpDialog } from './HelpDialog'
 import { Stepper } from './Stepper'
@@ -68,6 +68,67 @@ function useShortcuts() {
   }, [navigate, setHelp])
 }
 
+const REVEAL_SELECTOR = 'main > div > *, main .grid > *, main li > article'
+
+/** Slides blocks up as they scroll into view. Movement only: opacity is never touched. */
+function useScrollReveal(routeKey: string, off: boolean) {
+  useEffect(() => {
+    if (off || !('IntersectionObserver' in window)) return
+    const seen = new WeakSet<Element>()
+    let initial = 0
+    const io = new IntersectionObserver(
+      (entries) => {
+        let i = 0
+        for (const e of entries) {
+          if (!e.isIntersecting) continue
+          const el = e.target as HTMLElement
+          el.style.setProperty('--ri', String(Math.min(i++, 6)))
+          el.dataset.reveal = 'in'
+          io.unobserve(el)
+        }
+      },
+      { rootMargin: '0px 0px -6% 0px', threshold: 0.04 },
+    )
+    const scan = () => {
+      document.querySelectorAll<HTMLElement>(REVEAL_SELECTOR).forEach((el) => {
+        if (seen.has(el)) return
+        seen.add(el)
+        if (el.closest('[data-no-reveal],[role="dialog"]')) return
+        const pos = getComputedStyle(el).position
+        if (pos === 'fixed' || pos === 'sticky') return
+        const r = el.getBoundingClientRect()
+        // Very tall containers are skipped; the cards inside them reveal one by one.
+        if (r.height > window.innerHeight * 1.2) return
+        if (r.top > window.innerHeight * 0.92) {
+          el.dataset.reveal = 'pending'
+          io.observe(el)
+        } else {
+          el.style.setProperty('--ri', String(Math.min(initial++, 6)))
+          el.dataset.reveal = 'in'
+        }
+      })
+    }
+    let raf = 0
+    const queue = () => {
+      cancelAnimationFrame(raf)
+      raf = requestAnimationFrame(scan)
+    }
+    const main = document.getElementById('main')
+    const mo = new MutationObserver(queue)
+    if (main) mo.observe(main, { childList: true, subtree: true })
+    queue()
+    return () => {
+      cancelAnimationFrame(raf)
+      mo.disconnect()
+      io.disconnect()
+      document.querySelectorAll<HTMLElement>('[data-reveal]').forEach((el) => {
+        delete el.dataset.reveal
+        el.style.removeProperty('--ri')
+      })
+    }
+  }, [routeKey, off])
+}
+
 const Icon = ({ dark }: { dark: boolean }) =>
   dark ? (
     <svg
@@ -105,17 +166,19 @@ export function Layout({ children }: { children: ReactNode }) {
     theme,
     toggleTheme,
     setHelp,
-    reduceMotion,
+    reduceMotion: motionChoice,
     toggleReduceMotion,
     setCommandOpen,
     toast,
   } = useUI()
   const { reduce } = useMotion()
+  const systemReduced = !!useReducedMotion()
   const main = useRef<HTMLElement>(null)
   const first = useRef(true)
   const [wipe, setWipe] = useState(0)
   const [scrolled, setScrolled] = useState(false)
   useShortcuts()
+  useScrollReveal(pathname, reduce)
 
   useEffect(() => {
     try {
@@ -127,6 +190,12 @@ export function Layout({ children }: { children: ReactNode }) {
       // Storage may be blocked; the app can still use in-memory state.
     }
   }, [toast])
+
+  useEffect(() => {
+    const root = document.documentElement
+    root.classList.toggle('reduce-motion', reduce)
+    root.classList.toggle('motion-on', motionChoice === false)
+  }, [reduce, motionChoice])
 
   useEffect(() => {
     document.documentElement.classList.toggle('dark', theme === 'dark')
@@ -186,6 +255,21 @@ export function Layout({ children }: { children: ReactNode }) {
         className="fixed inset-x-0 top-0 z-[75] h-1 origin-left scale-x-0 bg-accent"
         id="scroll-progress"
       />
+      {systemReduced && motionChoice === null && (
+        <div
+          role="note"
+          className="border-b-2 border-edge bg-accent px-4 py-2 text-center text-sm font-bold text-on-accent"
+        >
+          Animations are off because your device asks for reduced motion.{' '}
+          <button
+            type="button"
+            onClick={toggleReduceMotion}
+            className="min-h-[44px] rounded-lg border-2 border-edge bg-surface px-3 text-fg underline"
+          >
+            Turn animations on
+          </button>
+        </div>
+      )}
       <header
         className={
           scrolled
@@ -199,6 +283,12 @@ export function Layout({ children }: { children: ReactNode }) {
               to="/"
               className="inline-flex min-h-[44px] items-center font-head text-3xl font-extrabold"
             >
+              <span
+                aria-hidden="true"
+                className="logo-mark mr-2 inline-grid h-9 w-9 place-items-center rounded-lg border-2 border-edge bg-accent text-xl text-on-accent shadow-hard-sm"
+              >
+                G
+              </span>
               Grantly<span className="text-accent">.</span>
             </Link>
             <div className="flex gap-2">
@@ -230,7 +320,7 @@ export function Layout({ children }: { children: ReactNode }) {
               <button
                 type="button"
                 onClick={toggleReduceMotion}
-                aria-pressed={reduceMotion}
+                aria-pressed={reduce}
                 className={`hidden sm:block ${motionToggleClass}`}
               >
                 Reduce motion
@@ -249,9 +339,9 @@ export function Layout({ children }: { children: ReactNode }) {
         >
           <motion.div
             key={pathname}
-            initial={reduce ? false : { opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.15, duration: 0.01 }}
+            variants={pageEnter}
+            initial={reduce ? false : 'hidden'}
+            animate="show"
           >
             {children}
           </motion.div>
@@ -263,7 +353,7 @@ export function Layout({ children }: { children: ReactNode }) {
           <button
             type="button"
             onClick={toggleReduceMotion}
-            aria-pressed={reduceMotion}
+            aria-pressed={reduce}
             className={`mt-3 text-fg ${motionToggleClass}`}
           >
             Reduce motion

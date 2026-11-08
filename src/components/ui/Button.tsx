@@ -6,8 +6,8 @@ type Variant = 'primary' | 'ink' | 'ghost' | 'danger'
 type Size = 'md' | 'sm'
 
 const base =
-  'group relative inline-flex items-center justify-center gap-2 overflow-hidden rounded-xl border-2 border-edge font-bold leading-tight transition-[transform,opacity] duration-100 ' +
-  'shadow-hard can-hover:hover:-translate-x-0.5 can-hover:hover:-translate-y-0.5 ' +
+  'group relative inline-flex items-center justify-center gap-2 overflow-hidden rounded-xl border-2 border-edge font-bold leading-tight transition-[transform,opacity,box-shadow] duration-200 ease-out ' +
+  'shadow-hard can-hover:hover:-translate-x-1 can-hover:hover:-translate-y-1 can-hover:hover:-rotate-1 can-hover:hover:shadow-hard-lg ' +
   'active:translate-x-1 active:translate-y-1 active:shadow-none ' +
   'disabled:cursor-not-allowed disabled:opacity-60 disabled:shadow-none disabled:hover:translate-x-0 disabled:hover:translate-y-0'
 
